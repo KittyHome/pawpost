@@ -1,0 +1,33 @@
+{
+  "name": "@pawpost/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./validation": "./src/validation.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pawpost/ai": "workspace:*",
+    "@pawpost/core": "workspace:*",
+    "@pawpost/db": "workspace:*",
+    "@pawpost/mail": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@pawpost/tsconfig": "workspace:*",
+    "@types/mailparser": "^3",
+    "@types/node": "22.20.5",
+    "@types/smtp-server": "^3",
+    "embedded-postgres": "18.4.0-beta.17",
+    "mailparser": "3.9.40",
+    "smtp-server": "3.19.23",
+    "typescript": "^5",
+    "vitest": "5.0.5"
+  }
+}

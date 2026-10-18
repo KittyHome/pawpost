@@ -1,0 +1,48 @@
+# Self-hosting: cp .env.example .env, fill in APP_URL, APP_SECRET and the admin
+# login, then `docker compose up -d`. The worker applies database migrations on start.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pawpost
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pawpost}
+      POSTGRES_DB: pawpost
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pawpost -d pawpost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build:
+      context: .
+      target: worker
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://pawpost:${POSTGRES_PASSWORD:-pawpost}@postgres:5432/pawpost
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://pawpost:${POSTGRES_PASSWORD:-pawpost}@postgres:5432/pawpost
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      worker:
+        condition: service_started
+
+volumes:
+  pgdata:

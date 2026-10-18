@@ -1,0 +1,27 @@
+{
+  "name": "@pawpost/mail",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./presets": "./src/presets.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "imapflow": "2.5.2",
+    "mailparser": "3.9.40",
+    "nodemailer": "10.1.2"
+  },
+  "devDependencies": {
+    "@pawpost/tsconfig": "workspace:*",
+    "@types/mailparser": "^3",
+    "@types/node": "22.20.5",
+    "@types/nodemailer": "^8",
+    "typescript": "^5",
+    "vitest": "5.0.5"
+  }
+}

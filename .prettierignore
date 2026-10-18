@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+**/.next
+**/dist
+**/.turbo
+.data
+packages/db/migrations
+**/next-env.d.ts
+LICENSE.md

@@ -1,0 +1,4 @@
+# Normalise line endings so Windows and Unix contributors produce identical files.
+* text=auto eol=lf
+*.png binary
+*.ico binary

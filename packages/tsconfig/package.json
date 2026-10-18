@@ -1,0 +1,10 @@
+{
+  "name": "@pawpost/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "library.json",
+    "nextjs.json"
+  ]
+}
