@@ -32,6 +32,7 @@ export async function startTestDatabase(): Promise<DatabaseHandle & { url: strin
     user: "test",
     password: "test",
     persistent: false,
+    initdbFlags: ["--encoding=UTF8", "--locale=C"],
     onLog: () => {},
     onError: () => {},
   });

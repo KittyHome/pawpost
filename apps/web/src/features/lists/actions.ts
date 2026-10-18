@@ -28,10 +28,11 @@ export async function importContacts(
 ): Promise<ActionState<ImportReport>> {
   return runAction(async () => {
     const csv = await readCsv(form);
-    const targetId = listId ?? (await engine().lists.create({ name: form.get("name") })).id;
-    const report = await engine().lists.importCsv(targetId, csv, importOptions(form));
+    const report = listId
+      ? await engine().lists.importCsv(listId, csv, importOptions(form))
+      : await engine().lists.createFromCsv(form.get("name"), csv, importOptions(form));
     revalidatePath("/lists");
-    revalidatePath(`/lists/${targetId}`);
+    revalidatePath(`/lists/${report.listId}`);
     return { data: report, message: `Imported ${report.imported} contacts.` };
   });
 }

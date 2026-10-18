@@ -223,4 +223,29 @@ describe("engine end to end", () => {
     expect((await engine.campaigns.get(campaignId)).stats.unsubscribes).toBe(1);
     expect(await engine.suppressions.unsubscribeByToken("not-a-real-token-123456", "link")).toBe(false);
   });
+
+  it("imports names in any script and stores them unchanged", async () => {
+    const report = await engine.lists.createFromCsv(
+      "International",
+      ["Name,Email,City", "谋 李,li@intl.test,北京", "محمد علي,ali@intl.test,القاهرة", "Zoë Ångström,zoe@intl.test,Malmö"].join(
+        "\n",
+      ),
+      { checkDomains: false },
+    );
+    expect(report.imported).toBe(3);
+    const { rows } = await engine.lists.contacts(report.listId);
+    expect(rows.map((c) => [c.firstName, c.lastName, c.attributes.City])).toEqual(
+      expect.arrayContaining([
+        ["谋", "李", "北京"],
+        ["محمد", "علي", "القاهرة"],
+        ["Zoë", "Ångström", "Malmö"],
+      ]),
+    );
+  });
+
+  it("creates no list when the file can't be imported", async () => {
+    const before = (await engine.lists.list()).length;
+    await expect(engine.lists.createFromCsv("Broken", "Name,Phone\nAnn,123", {})).rejects.toThrow(/No email column/);
+    expect((await engine.lists.list()).length).toBe(before);
+  });
 });

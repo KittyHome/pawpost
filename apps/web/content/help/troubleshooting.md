@@ -102,6 +102,14 @@ Use **Test connection** in Settings → AI to check after any change. If reply c
 | "CSV files are limited to 10 MB" / "100,000 rows" | Split the file into several lists                                           |
 | Names look garbled (Ã©, â€™)                      | Re-save from Excel as **CSV UTF-8**                                         |
 
+## "Pawpost needs UTF8" when starting
+
+The worker stops at startup with "The database uses the … character encoding; Pawpost needs UTF8". The PostgreSQL database was created with a legacy character set, which can't store names in many languages. Pawpost refuses to run on it rather than failing halfway through an import.
+
+- **Docker Compose:** the bundled database is always UTF-8, so this only happens with your own PostgreSQL server.
+- **Your own PostgreSQL:** create a new database with `CREATE DATABASE pawpost ENCODING 'UTF8' TEMPLATE template0;`, point `DATABASE_URL` at it, and start the worker again.
+- **Local development (`pnpm db:dev`):** delete the `.data/postgres` folder and run `pnpm db:dev` again.
+
 ## I can't sign in
 
 The login comes from the server configuration (`ADMIN_EMAIL` and `ADMIN_PASSWORD`); it can't be reset from the dashboard. Ask whoever installed Pawpost. You stay signed in for 7 days per browser.

@@ -1,9 +1,9 @@
-import { CsvFormatError, DomainError, emailDomain, parseContactsCsv, type RejectReason } from "@pawpost/core";
-import { campaigns, contactLists, contacts, suppressions, type ContactList } from "@pawpost/db";
+import { CsvFormatError, DomainError, emailDomain, parseContactsCsv, type ParsedContact, type RejectReason } from "@pawpost/core";
+import { campaigns, contactLists, contacts, suppressions, type ContactList, type Executor } from "@pawpost/db";
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import type { EngineContext } from "./context";
-import { importContactsInput, listInput } from "./validation";
+import { importContactsInput, listInput, type ImportContactsOptions } from "./validation";
 
 export type ImportRejectReason = RejectReason | "suppressed" | "no_mail_domain";
 
@@ -109,84 +109,114 @@ export function createListService(ctx: EngineContext) {
     },
 
     /**
-     * Imports a CSV into a list. Rows are rejected (never silently dropped) when the
-     * address is malformed, duplicated, a role inbox, on the suppression list, or on
-     * a domain that cannot receive mail.
+     * Imports a CSV into an existing list. Rows are rejected (never silently dropped)
+     * when the address is malformed, duplicated, a role inbox, on the suppression list,
+     * or on a domain that cannot receive mail. All rows are written in one transaction.
      */
     async importCsv(listId: string, csvText: string, rawOptions: unknown = {}): Promise<ImportReport> {
-      const options = importContactsInput.parse(rawOptions);
       const list = await find(listId);
+      const prepared = await prepareImport(csvText, importContactsInput.parse(rawOptions));
+      return db.transaction((tx) => writeImport(tx, list, prepared));
+    },
 
-      let parsed;
-      try {
-        parsed = parseContactsCsv(csvText, { skipRoleAddresses: options.skipRoleAddresses });
-      } catch (error) {
-        if (error instanceof CsvFormatError) throw new DomainError("invalid_csv", error.message);
-        throw error;
-      }
-
-      const rejected: ImportReport["rejectedSample"] = parsed.rejected.map((r) => ({ ...r }));
-      let candidates = parsed.contacts;
-
-      // Suppressed addresses never enter a list.
-      const suppressed = new Set<string>();
-      for (const chunk of chunks(
-        candidates.map((c) => c.email),
-        INSERT_CHUNK,
-      )) {
-        const rows = await db.select({ email: suppressions.email }).from(suppressions).where(inArray(suppressions.email, chunk));
-        rows.forEach((r) => suppressed.add(r.email));
-      }
-
-      const domainStatus = options.checkDomains
-        ? await ctx.checkDomains(candidates.map((c) => emailDomain(c.email)))
-        : new Map<string, string>();
-
-      candidates = candidates.filter((c) => {
-        if (suppressed.has(c.email)) {
-          rejected.push({ line: c.line, email: c.email, reason: "suppressed" });
-          return false;
-        }
-        if (domainStatus.get(emailDomain(c.email)) === "no_mail") {
-          rejected.push({ line: c.line, email: c.email, reason: "no_mail_domain" });
-          return false;
-        }
-        return true;
+    /** Creates a list and imports a CSV into it atomically: on any failure, no list is left behind. */
+    async createFromCsv(rawName: unknown, csvText: string, rawOptions: unknown = {}): Promise<ImportReport> {
+      const { name } = listInput.parse({ name: rawName });
+      // Parse and check before writing anything, so a bad file never creates a list.
+      const prepared = await prepareImport(csvText, importContactsInput.parse(rawOptions));
+      return db.transaction(async (tx) => {
+        const [list] = await tx.insert(contactLists).values({ name }).returning();
+        return writeImport(tx, list!, prepared);
       });
-
-      let imported = 0;
-      for (const chunk of chunks(candidates, INSERT_CHUNK)) {
-        const inserted = await db
-          .insert(contacts)
-          .values(chunk.map(({ line: _line, ...c }) => ({ ...c, listId })))
-          .onConflictDoNothing({ target: [contacts.listId, contacts.email] })
-          .returning({ id: contacts.id });
-        imported += inserted.length;
-      }
-
-      const attributeColumns = [...new Set([...list.attributeColumns, ...parsed.attributeColumns])];
-      await db.update(contactLists).set({ attributeColumns }).where(eq(contactLists.id, listId));
-
-      const counts = Object.fromEntries(
-        (["invalid_email", "duplicate", "role_address", "missing_email", "suppressed", "no_mail_domain"] as const).map((r) => [
-          r,
-          rejected.filter((x) => x.reason === r).length,
-        ]),
-      ) as Record<ImportRejectReason, number>;
-
-      const report: ImportReport = {
-        listId,
-        totalRows: parsed.contacts.length + parsed.rejected.length,
-        imported,
-        alreadyInList: candidates.length - imported,
-        rejected: counts,
-        rejectedSample: rejected.sort((a, b) => a.line - b.line).slice(0, 50),
-        attributeColumns,
-      };
-      ctx.logger.info("contacts imported", { listId, imported, rejected: rejected.length });
-      return report;
     },
   };
+
+  /** Read-only part of an import: parse, then filter out suppressed and undeliverable addresses. */
+  async function prepareImport(csvText: string, options: ImportContactsOptions): Promise<PreparedImport> {
+    let parsed;
+    try {
+      parsed = parseContactsCsv(csvText, { skipRoleAddresses: options.skipRoleAddresses });
+    } catch (error) {
+      if (error instanceof CsvFormatError) throw new DomainError("invalid_csv", error.message);
+      throw error;
+    }
+
+    const rejected: ImportReport["rejectedSample"] = parsed.rejected.map((r) => ({ ...r }));
+
+    // Suppressed addresses never enter a list.
+    const suppressed = new Set<string>();
+    for (const chunk of chunks(
+      parsed.contacts.map((c) => c.email),
+      INSERT_CHUNK,
+    )) {
+      const rows = await db.select({ email: suppressions.email }).from(suppressions).where(inArray(suppressions.email, chunk));
+      rows.forEach((r) => suppressed.add(r.email));
+    }
+
+    const domainStatus = options.checkDomains
+      ? await ctx.checkDomains(parsed.contacts.map((c) => emailDomain(c.email)))
+      : new Map<string, string>();
+
+    const candidates = parsed.contacts.filter((c) => {
+      if (suppressed.has(c.email)) {
+        rejected.push({ line: c.line, email: c.email, reason: "suppressed" });
+        return false;
+      }
+      if (domainStatus.get(emailDomain(c.email)) === "no_mail") {
+        rejected.push({ line: c.line, email: c.email, reason: "no_mail_domain" });
+        return false;
+      }
+      return true;
+    });
+
+    return {
+      candidates,
+      rejected,
+      attributeColumns: parsed.attributeColumns,
+      totalRows: parsed.contacts.length + parsed.rejected.length,
+    };
+  }
+
+  async function writeImport(tx: Executor, list: ContactList, prepared: PreparedImport): Promise<ImportReport> {
+    let imported = 0;
+    for (const chunk of chunks(prepared.candidates, INSERT_CHUNK)) {
+      const inserted = await tx
+        .insert(contacts)
+        .values(chunk.map(({ line: _line, ...c }) => ({ ...c, listId: list.id })))
+        .onConflictDoNothing({ target: [contacts.listId, contacts.email] })
+        .returning({ id: contacts.id });
+      imported += inserted.length;
+    }
+
+    const attributeColumns = [...new Set([...list.attributeColumns, ...prepared.attributeColumns])];
+    await tx.update(contactLists).set({ attributeColumns }).where(eq(contactLists.id, list.id));
+
+    const { rejected } = prepared;
+    const counts = Object.fromEntries(
+      (["invalid_email", "duplicate", "role_address", "missing_email", "suppressed", "no_mail_domain"] as const).map((r) => [
+        r,
+        rejected.filter((x) => x.reason === r).length,
+      ]),
+    ) as Record<ImportRejectReason, number>;
+
+    ctx.logger.info("contacts imported", { listId: list.id, imported, rejected: rejected.length });
+    return {
+      listId: list.id,
+      totalRows: prepared.totalRows,
+      imported,
+      alreadyInList: prepared.candidates.length - imported,
+      rejected: counts,
+      rejectedSample: [...rejected].sort((a, b) => a.line - b.line).slice(0, 50),
+      attributeColumns,
+    };
+  }
+}
+
+interface PreparedImport {
+  candidates: ParsedContact[];
+  rejected: ImportReport["rejectedSample"];
+  attributeColumns: string[];
+  totalRows: number;
 }
 
 export type ListService = ReturnType<typeof createListService>;

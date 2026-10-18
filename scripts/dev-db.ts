@@ -26,6 +26,9 @@ const pg = new EmbeddedPostgres({
   user: USER,
   password: PASSWORD,
   persistent: true,
+  // Always UTF-8: initdb otherwise inherits the OS locale (WIN1252 on Windows),
+  // which can't store non-Latin names.
+  initdbFlags: ["--encoding=UTF8", "--locale=C"],
   onLog: () => {},
   onError: (message) => console.error(String(message).trim()),
 });
@@ -41,7 +44,14 @@ await client.end();
 if (exists.rowCount === 0) await pg.createDatabase(DATABASE);
 
 const url = `postgres://${USER}:${PASSWORD}@localhost:${PORT}/${DATABASE}`;
-await runMigrations(url);
+try {
+  await runMigrations(url);
+} catch (error) {
+  console.error(`\n${(error as Error).message}`);
+  console.error(`\nThis local cluster was created with an older setup. Delete ${DATA_DIR} and run pnpm db:dev again.`);
+  await pg.stop();
+  process.exit(1);
+}
 
 console.log(`\nPostgres is running${fresh ? " (new cluster)" : ""}.`);
 console.log(`DATABASE_URL=${url}\n`);
