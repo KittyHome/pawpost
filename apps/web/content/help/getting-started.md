@@ -8,7 +8,7 @@ keywords: start, setup, first campaign, tutorial, onboarding, begin
 
 Pawpost sends short, personal-looking email sequences from **your own mailboxes** to **your own contact lists**. It sends slowly, the way a person would, reads the replies, and stops emailing anyone who answers, bounces or asks to stop.
 
-This guide takes you through the five steps to your first email. Each step links to a detailed article if you want more.
+This guide takes you through the five steps to your first email. It assumes you're signed in; if you're setting up a new installation, the first screen asks you to create the owner account, and you can invite teammates later from **Settings → Team**. Each step links to a detailed article if you want more.
 
 > [!TIP]
 > Keep this page open in a second tab while you work through the steps.

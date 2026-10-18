@@ -119,3 +119,29 @@ function mapColumns(headers: string[]): Partial<Record<KnownColumn, string>> {
   }
   return mapping;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Export                                                                     */
+/* -------------------------------------------------------------------------- */
+
+export interface CsvColumn<T> {
+  header: string;
+  value: (row: T) => string | number | boolean | Date | null | undefined;
+}
+
+/**
+ * Builds a CSV file (UTF-8 with BOM, so Excel opens non-Latin text correctly).
+ * Cells that a spreadsheet would treat as a formula are prefixed with an
+ * apostrophe, which prevents CSV/formula injection from contact data.
+ */
+export function toCsv<T>(rows: readonly T[], columns: readonly CsvColumn<T>[]): string {
+  const data = rows.map((row) =>
+    columns.map((column) => {
+      const value = column.value(row);
+      if (value === null || value === undefined) return "";
+      const text = value instanceof Date ? value.toISOString() : String(value);
+      return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+    }),
+  );
+  return "﻿" + Papa.unparse({ fields: columns.map((c) => c.header), data }, { newline: "\r\n" });
+}

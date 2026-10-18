@@ -20,7 +20,8 @@
     "db:migrate": "pnpm --filter @pawpost/db migrate",
     "smtp:dev": "tsx scripts/dev-smtp.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "user:reset-link": "tsx scripts/reset-link.ts"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

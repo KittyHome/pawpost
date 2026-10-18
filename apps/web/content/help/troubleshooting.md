@@ -112,4 +112,9 @@ The worker stops at startup with "The database uses the … character encoding; 
 
 ## I can't sign in
 
-The login comes from the server configuration (`ADMIN_EMAIL` and `ADMIN_PASSWORD`); it can't be reset from the dashboard. Ask whoever installed Pawpost. You stay signed in for 7 days per browser.
+- **Wrong email or password:** check the email you were invited with. Use **Forgot password?** if system email is configured, or ask an admin for a reset link (**Settings → Team → ⋯ → Reset password**).
+- **"Too many failed attempts":** the account is locked for 15 minutes after 10 wrong passwords. An admin's reset link unlocks it straight away.
+- **"This account has been disabled":** an admin disabled it. Ask them to re-enable you in **Settings → Team**.
+- **The owner is locked out and there's no other admin:** whoever runs the server can run `pnpm user:reset-link owner@example.com` to create a reset link.
+
+You stay signed in for 30 days of inactivity on each device. [Team and access](/help/team-and-access)

@@ -1,9 +1,11 @@
-import { DomainError, normalizeEmail } from "@pawpost/core";
+import { DomainError, normalizeEmail, toCsv } from "@pawpost/core";
 import { contacts, enrollments, suppressions, type EnrollmentStatus, type Executor, type SuppressionReason } from "@pawpost/db";
 import { and, count, desc, eq, ilike, inArray } from "drizzle-orm";
 
-import type { EngineContext } from "./context";
+import { writeAudit } from "./audit";
+import type { Actor, EngineContext } from "./context";
 import { recordEvent } from "./events";
+import { requirePermission } from "./guard";
 import { suppressionInput } from "./validation";
 
 const STOP_STATUS: Record<SuppressionReason, EnrollmentStatus> = {
@@ -71,17 +73,54 @@ export function createSuppressionService(ctx: EngineContext) {
       return { rows, total: total?.n ?? 0, page, pageSize };
     },
 
-    async add(raw: unknown): Promise<void> {
+    async add(actor: Actor, raw: unknown): Promise<void> {
       const input = suppressionInput.parse(raw);
-      await suppressEmail(db, input.email, "manual", input.note);
+      await db.transaction(async (tx) => {
+        const { added } = await suppressEmail(tx, input.email, "manual", input.note);
+        if (added) {
+          await writeAudit(tx, actor, {
+            action: "suppression.added",
+            summary: `${actor.email} suppressed ${input.email}`,
+            entityType: "suppression",
+            entityId: input.email,
+          });
+        }
+      });
     },
 
-    async remove(email: string): Promise<void> {
-      const deleted = await db
-        .delete(suppressions)
-        .where(eq(suppressions.email, normalizeEmail(email)))
-        .returning();
-      if (!deleted.length) throw new DomainError("not_found", "That address is not on the suppression list.");
+    async remove(actor: Actor, email: string): Promise<void> {
+      requirePermission(actor, "suppressions.remove");
+      await db.transaction(async (tx) => {
+        const deleted = await tx
+          .delete(suppressions)
+          .where(eq(suppressions.email, normalizeEmail(email)))
+          .returning();
+        if (!deleted.length) throw new DomainError("not_found", "That address is not on the suppression list.");
+        await writeAudit(tx, actor, {
+          action: "suppression.removed",
+          summary: `${actor.email} removed ${deleted[0]!.email} from the suppression list (was: ${deleted[0]!.reason})`,
+          entityType: "suppression",
+          entityId: deleted[0]!.email,
+        });
+      });
+    },
+
+    async exportCsv(actor: Actor): Promise<{ filename: string; csv: string }> {
+      requirePermission(actor, "data.export");
+      const rows = await db.select().from(suppressions).orderBy(desc(suppressions.createdAt));
+      await writeAudit(db, actor, {
+        action: "suppression.exported",
+        summary: `${actor.email} exported the suppression list (${rows.length} addresses)`,
+      });
+      return {
+        filename: "suppression-list.csv",
+        csv: toCsv(rows, [
+          { header: "email", value: (r) => r.email },
+          { header: "reason", value: (r) => r.reason },
+          { header: "note", value: (r) => r.note },
+          { header: "added_at", value: (r) => r.createdAt },
+        ]),
+      };
     },
 
     /** For the confirmation page. Returns a masked address, or null for an unknown token. */

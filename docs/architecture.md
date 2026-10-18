@@ -58,6 +58,18 @@ active ──claim──▶ sending ──sent, more steps──▶ active (next
 active/completed ──reply──▶ replied      ──DSN──▶ bounced      ──opt-out──▶ unsubscribed
 ```
 
+## Accounts, permissions and audit
+
+Each installation is one organisation. `users` have a role; `sessions`, `invitations` and `password_resets` hold hashed, expiring tokens.
+
+Services that change data take an `Actor` (the signed-in user plus their IP address). They check the role with `requirePermission`, and write an audit entry with `writeAudit` inside the same transaction as the change. A change and its audit record therefore commit or roll back together.
+
+## Trash and erasure
+
+`contact_lists`, `contacts` and `campaigns` are soft-deleted (`deleted_at`, `deleted_by_id`). Every query filters them out; the dispatcher skips trashed contacts, so their sequences pause. The uniqueness of a contact within a list only applies to live rows (a partial index), so a trashed address can be re-imported. The worker purges items older than 30 days: campaigns first, then contacts, then lists no campaign still references.
+
+Erasing a person hard-deletes their contacts (cascading to enrollments), messages and events, and adds a `manual` suppression so they're never contacted again. The audit entry stores only a masked address.
+
 ## The send pipeline (`engine/src/dispatch.ts`)
 
 Each worker cycle:
@@ -93,5 +105,9 @@ Background AI use (reply triage) never blocks mail processing: failures return `
 ## Security notes
 
 - Mailbox passwords and the AI key are encrypted with AES-256-GCM, using a key derived from `APP_SECRET`.
-- Sessions are HMAC-signed cookies. `proxy.ts` does an optimistic redirect; every page and Server Action re-verifies the session.
+- Users sign in with email and password (scrypt, per-user salt). Ten failed attempts lock an account for 15 minutes.
+- Sessions are server-side: the cookie holds a random token and only its SHA-256 hash is stored, so sessions can be listed and revoked. Invitation and password-reset tokens work the same way and are single-use.
+- `proxy.ts` only checks that a session cookie exists; every page, Server Action and export route validates it against the database.
+- Roles (owner, admin, member) are defined once in `engine/src/permissions.ts`. The engine enforces them; the UI uses the same table to hide what you can't do.
+- Every change made by a user is written to `audit_log` in the same transaction as the change itself.
 - Recipient-facing unsubscribe pages are public and token-based. A GET only shows a confirm button, because link scanners open every URL; the change happens on POST (form or RFC 8058 one-click).

@@ -1,22 +1,38 @@
 "use client";
 
-import { PauseIcon, PlayIcon, RocketIcon, Trash2Icon } from "lucide-react";
+import { CopyIcon, DownloadIcon, MoreHorizontalIcon, PauseIcon, PlayIcon, RocketIcon, Trash2Icon } from "lucide-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import { ActionButton } from "@/components/action-button";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-import { deleteCampaign, pauseCampaign, resumeCampaign, startCampaign } from "./actions";
+import { duplicateCampaign, pauseCampaign, resumeCampaign, startCampaign, trashCampaign } from "./actions";
 
 export function CampaignControls({
   campaignId,
   status,
   contactCount,
   canStart,
+  canExport,
 }: {
   campaignId: string;
   status: string;
   contactCount: number;
   canStart: boolean;
+  canExport: boolean;
 }) {
+  const [confirmTrash, setConfirmTrash] = useState(false);
+  const [busy, startTransition] = useTransition();
+
   return (
     <>
       {status === "draft" && (
@@ -42,20 +58,47 @@ export function CampaignControls({
           <PlayIcon /> Resume
         </ActionButton>
       )}
-      {status !== "active" && (
-        <ActionButton
-          variant="outline"
-          action={deleteCampaign.bind(null, campaignId)}
-          confirm={{
-            title: "Delete this campaign?",
-            description: "Its sequence, enrollments and statistics are removed. Suppressed addresses stay suppressed.",
-            confirmLabel: "Delete campaign",
-            destructive: true,
-          }}
-        >
-          <Trash2Icon /> Delete
-        </ActionButton>
-      )}
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon" aria-label="More campaign actions" disabled={busy}>
+            <MoreHorizontalIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onSelect={() =>
+              startTransition(async () => {
+                const result = await duplicateCampaign(campaignId);
+                if (result.status === "error") toast.error(result.message);
+              })
+            }
+          >
+            <CopyIcon /> Duplicate
+          </DropdownMenuItem>
+          {canExport && status !== "draft" && (
+            <DropdownMenuItem asChild>
+              <a href={`/api/export/campaigns/${campaignId}`} download>
+                <DownloadIcon /> Export results (CSV)
+              </a>
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" disabled={status === "active"} onSelect={() => setConfirmTrash(true)}>
+            <Trash2Icon /> {status === "active" ? "Pause to delete" : "Move to trash"}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmDialog
+        open={confirmTrash}
+        onOpenChange={setConfirmTrash}
+        onConfirm={() => trashCampaign(campaignId)}
+        title="Move this campaign to the trash?"
+        description="It can be restored for 30 days. Suppressed addresses stay suppressed."
+        confirmLabel="Move to trash"
+        destructive
+      />
     </>
   );
 }

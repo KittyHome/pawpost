@@ -9,10 +9,10 @@ import { formToObject, runAction } from "@/server/action";
 import { engine } from "@/server/engine";
 
 export async function saveMailbox(mailboxId: string | null, _prev: ActionState, form: FormData): Promise<ActionState> {
-  const result = await runAction(async () => {
+  const result = await runAction(async ({ actor }) => {
     const input = formToObject(form);
-    if (mailboxId) await engine().mailboxes.update(mailboxId, input);
-    else await engine().mailboxes.create(input);
+    if (mailboxId) await engine().mailboxes.update(actor, mailboxId, input);
+    else await engine().mailboxes.create(actor, input);
   });
   if (result.status !== "success") return result;
   revalidatePath("/mailboxes");
@@ -20,8 +20,8 @@ export async function saveMailbox(mailboxId: string | null, _prev: ActionState, 
 }
 
 export async function testMailbox(mailboxId: string): Promise<ActionState> {
-  return runAction(async () => {
-    const result = await engine().mailboxes.test(mailboxId);
+  return runAction(async ({ actor }) => {
+    const result = await engine().mailboxes.test(actor, mailboxId);
     revalidatePath("/mailboxes");
     const problems = [!result.smtp.ok && `SMTP: ${result.smtp.error}`, !result.imap.ok && `IMAP: ${result.imap.error}`].filter(
       Boolean,
@@ -32,16 +32,16 @@ export async function testMailbox(mailboxId: string): Promise<ActionState> {
 }
 
 export async function setMailboxPaused(mailboxId: string, paused: boolean): Promise<ActionState> {
-  return runAction(async () => {
-    await engine().mailboxes.setPaused(mailboxId, paused);
+  return runAction(async ({ actor }) => {
+    await engine().mailboxes.setPaused(actor, mailboxId, paused);
     revalidatePath("/mailboxes");
     return { message: paused ? "Mailbox paused." : "Mailbox resumed." };
   });
 }
 
 export async function deleteMailbox(mailboxId: string): Promise<ActionState> {
-  return runAction(async () => {
-    await engine().mailboxes.remove(mailboxId);
+  return runAction(async ({ actor }) => {
+    await engine().mailboxes.remove(actor, mailboxId);
     revalidatePath("/mailboxes");
     return { message: "Mailbox removed." };
   });

@@ -3,28 +3,57 @@
 import { redirect } from "next/navigation";
 
 import type { ActionState } from "@/lib/action-state";
-import { checkCredentials, endSession, startSession } from "@/server/session";
+import { formToObject, runPublicAction } from "@/server/action";
+import { engine } from "@/server/engine";
+import { env } from "@/server/env";
+import { clearSessionCookie, requestMeta, sessionToken, setSessionCookie } from "@/server/session";
 
-/** Only allow same-site relative redirects after login. */
+/** Only allow same-site relative redirects after sign-in. */
 function safeNext(value: FormDataEntryValue | null): string {
   const next = typeof value === "string" ? value : "";
   return next.startsWith("/") && !next.startsWith("//") ? next : "/";
 }
 
 export async function login(_prev: ActionState, form: FormData): Promise<ActionState> {
-  const email = String(form.get("email") ?? "");
-  const password = String(form.get("password") ?? "");
-
-  if (!checkCredentials(email, password)) {
-    // Slow down guessing.
-    await new Promise((resolve) => setTimeout(resolve, 750));
-    return { status: "error", message: "Wrong email or password." };
-  }
-  await startSession(email.trim().toLowerCase());
-  redirect(safeNext(form.get("next")));
+  return runPublicAction(async () => {
+    const { token } = await engine().accounts.signIn(formToObject(form), await requestMeta());
+    await setSessionCookie(token);
+    redirect(safeNext(form.get("next")));
+  });
 }
 
 export async function logout(): Promise<void> {
-  await endSession();
+  await engine().accounts.signOut(await sessionToken());
+  await clearSessionCookie();
   redirect("/login");
+}
+
+export async function setupOwner(_prev: ActionState, form: FormData): Promise<ActionState> {
+  return runPublicAction(async () => {
+    const { token } = await engine().accounts.setupOwner(formToObject(form), await requestMeta(), env().SETUP_TOKEN);
+    await setSessionCookie(token);
+    redirect("/");
+  });
+}
+
+export async function acceptInvitation(inviteToken: string, _prev: ActionState, form: FormData): Promise<ActionState> {
+  return runPublicAction(async () => {
+    const { token } = await engine().accounts.acceptInvitation(inviteToken, formToObject(form), await requestMeta());
+    await setSessionCookie(token);
+    redirect("/");
+  });
+}
+
+export async function requestPasswordReset(_prev: ActionState, form: FormData): Promise<ActionState> {
+  return runPublicAction(async () => {
+    await engine().accounts.requestPasswordReset(form.get("email"));
+    return { message: "If an account exists for that address, we've emailed a reset link. It expires in 1 hour." };
+  });
+}
+
+export async function resetPassword(resetToken: string, _prev: ActionState, form: FormData): Promise<ActionState> {
+  return runPublicAction(async () => {
+    await engine().accounts.resetPassword(resetToken, formToObject(form), await requestMeta());
+    redirect("/login?reset=1");
+  });
 }

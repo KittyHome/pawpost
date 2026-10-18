@@ -1,15 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { SESSION_COOKIE, verifySessionToken } from "@/server/session-token";
+const SESSION_COOKIE = "pawpost_session";
 
 /**
- * Optimistic auth gate: bounces signed-out visitors to /login before rendering.
- * Pages and Server Actions still verify the session themselves.
+ * Optimistic gate: visitors without a session cookie go to sign-in before any
+ * page renders. Whether the session is valid is checked against the database
+ * by every page and Server Action (server/session.ts).
  */
 export function proxy(request: NextRequest) {
-  const secret = process.env.APP_SECRET ?? "";
-  const session = verifySessionToken(request.cookies.get(SESSION_COOKIE)?.value, secret);
-  if (session) return NextResponse.next();
+  if (request.cookies.get(SESSION_COOKIE)?.value) return NextResponse.next();
 
   const login = new URL("/login", request.url);
   const next = request.nextUrl.pathname + request.nextUrl.search;
@@ -18,6 +17,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Public: login, recipient-facing unsubscribe pages, health check, static assets.
-  matcher: ["/((?!login|u/|api/unsubscribe|api/health|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|ico)$).*)"],
+  // Public: sign-in and account flows, recipient-facing unsubscribe pages, health check, static assets.
+  matcher: [
+    "/((?!login|setup|invite/|forgot-password|reset-password/|u/|api/unsubscribe|api/health|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|ico)$).*)",
+  ],
 };

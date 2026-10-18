@@ -34,3 +34,15 @@ describe("secrets", () => {
     expect(() => deriveSecretKey("short")).toThrow(/32/);
   });
 });
+
+describe("isDomainError", () => {
+  it("recognises domain errors by brand, even from another copy of the package", async () => {
+    const { DomainError, isDomainError } = await import("./errors");
+    expect(isDomainError(new DomainError("forbidden", "No."))).toBe(true);
+    expect(isDomainError(new Error("No."))).toBe(false);
+    expect(isDomainError(null)).toBe(false);
+    // What a second bundled copy of the class would produce.
+    const foreign = Object.assign(new Error("No."), { [Symbol.for("pawpost.domain-error")]: true, code: "forbidden" });
+    expect(isDomainError(foreign)).toBe(true);
+  });
+});

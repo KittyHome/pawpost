@@ -1,19 +1,33 @@
 "use client";
 
+import { ROLE_LABELS, type Role } from "@pawpost/engine/permissions";
 import {
   BanIcon,
   BookOpenIcon,
+  ChevronsUpDownIcon,
   InboxIcon,
   LayoutDashboardIcon,
   LogOutIcon,
   MailIcon,
   SendIcon,
   SettingsIcon,
+  Trash2Icon,
+  UserIcon,
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +37,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -44,26 +59,44 @@ const NAV = [
     items: [
       { title: "Mailboxes", href: "/mailboxes", icon: InboxIcon },
       { title: "Suppression list", href: "/suppressions", icon: BanIcon },
-      { title: "Settings", href: "/settings", icon: SettingsIcon },
     ],
   },
   {
-    label: "Support",
-    items: [{ title: "Help center", href: "/help", icon: BookOpenIcon }],
+    label: "Workspace",
+    items: [
+      { title: "Settings", href: "/settings", icon: SettingsIcon },
+      { title: "Trash", href: "/trash", icon: Trash2Icon, badge: true },
+      { title: "Help center", href: "/help", icon: BookOpenIcon },
+    ],
   },
 ];
 
+export interface SidebarUser {
+  name: string;
+  email: string;
+  role: Role;
+}
+
 export function AppSidebar({
-  userEmail,
+  user,
   worker,
+  trashCount,
   logoutAction,
 }: {
-  userEmail: string;
+  user: SidebarUser;
   worker: { online: boolean; lastSeenAt: string | null };
+  trashCount: number;
   logoutAction: () => Promise<void>;
 }) {
   const pathname = usePathname();
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const initials =
+    user.name
+      .split(/\s+/)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
 
   return (
     <Sidebar collapsible="icon">
@@ -99,6 +132,7 @@ export function AppSidebar({
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
+                    {"badge" in item && trashCount > 0 && <SidebarMenuBadge>{trashCount}</SidebarMenuBadge>}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>
@@ -111,6 +145,7 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
+              size="sm"
               tooltip={worker.online ? "Worker online" : "Worker offline"}
               className="cursor-default hover:bg-transparent active:bg-transparent"
             >
@@ -125,12 +160,50 @@ export function AppSidebar({
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <form action={logoutAction}>
-              <SidebarMenuButton type="submit" tooltip="Sign out">
-                <LogOutIcon />
-                <span className="truncate">{userEmail}</span>
-              </SidebarMenuButton>
-            </form>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
+                  <Avatar className="size-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg text-xs">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                  </div>
+                  <ChevronsUpDownIcon className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="start" className="w-(--radix-dropdown-menu-trigger-width) min-w-56">
+                <DropdownMenuLabel className="flex flex-col gap-0.5 font-normal">
+                  <span className="font-medium">{user.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {user.email} · {ROLE_LABELS[user.role]}
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <UserIcon /> Account
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings/team">
+                      <UsersIcon /> Team
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/help">
+                      <BookOpenIcon /> Help center
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => void logoutAction()}>
+                  <LogOutIcon /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

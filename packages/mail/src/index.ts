@@ -3,4 +3,5 @@ export * from "./dns";
 export * from "./imap";
 export * from "./presets";
 export * from "./smtp";
+export * from "./system-mail";
 export * from "./types";

@@ -16,7 +16,9 @@ import { appSettings } from "@pawpost/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import type { EngineContext } from "./context";
+import { writeAudit } from "./audit";
+import type { Actor, EngineContext } from "./context";
+import { requirePermission } from "./guard";
 import { aiSettingsInput } from "./validation";
 
 /** Deployment-level AI defaults, from environment variables. */
@@ -123,7 +125,8 @@ export function createAiService(ctx: EngineContext, env: AiEnvironment = {}) {
       };
     },
 
-    async saveSettings(raw: unknown): Promise<void> {
+    async saveSettings(actor: Actor, raw: unknown): Promise<void> {
+      requirePermission(actor, "settings.manage");
       const input = aiSettingsInput.parse(raw);
       const existing = await load();
       const next: StoredSettings = {
@@ -137,10 +140,16 @@ export function createAiService(ctx: EngineContext, env: AiEnvironment = {}) {
         .values({ key: SETTINGS_KEY, value: next })
         .onConflictDoUpdate({ target: appSettings.key, set: { value: next } });
       cache = null;
+      await writeAudit(db, actor, {
+        action: "settings.ai_updated",
+        summary: `${actor.email} updated AI settings${input.apiKey ? " (new API key)" : input.removeKey ? " (removed API key)" : ""}`,
+        metadata: { model: input.model, classifyReplies: input.classifyReplies },
+      });
     },
 
     /** Makes one tiny request, so a bad key or blocked network shows up in Settings, not mid-campaign. */
-    async test(): Promise<void> {
+    async test(actor: Actor): Promise<void> {
+      requirePermission(actor, "settings.manage");
       cache = null;
       await interactive((provider) => pingProvider(provider));
     },

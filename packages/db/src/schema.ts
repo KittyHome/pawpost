@@ -23,6 +23,105 @@ const updatedAt = () =>
     .$onUpdate(() => new Date());
 
 /* -------------------------------------------------------------------------- */
+/* People and access: one organisation per installation.                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * owner   everything, including managing admins (exactly one per install)
+ * admin   everything except managing the owner
+ * member  day-to-day work: lists, contacts, campaigns
+ */
+export const userRole = pgEnum("user_role", ["owner", "admin", "member"]);
+export const userStatus = pgEnum("user_status", ["active", "disabled"]);
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Always lower-case. */
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  /** scrypt, see @pawpost/core passwords. */
+  passwordHash: text("password_hash").notNull(),
+  role: userRole("role").notNull().default("member"),
+  status: userStatus("status").notNull().default("active"),
+  failedLoginCount: integer("failed_login_count").notNull().default(0),
+  lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/** Server-side sessions: the cookie holds a random token, only its hash is stored, so sessions can be revoked. */
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull().unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("sessions_user_idx").on(t.userId)],
+);
+
+export const invitations = pgTable("invitations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull(),
+  role: userRole("role").notNull().default("member"),
+  tokenHash: text("token_hash").notNull().unique(),
+  invitedById: uuid("invited_by_id").references(() => users.id, { onDelete: "set null" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+export const passwordResets = pgTable("password_resets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  /** Null when requested by the user themselves. */
+  createdById: uuid("created_by_id").references(() => users.id, { onDelete: "set null" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+/** Who did what. Written for every user action that changes data or access. */
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    actorId: uuid("actor_id").references(() => users.id, { onDelete: "set null" }),
+    /** Snapshot, so entries stay readable after the user is removed. */
+    actorEmail: text("actor_email"),
+    /** Dotted verb, e.g. "campaign.started", "contact.erased", "user.invited". */
+    action: text("action").notNull(),
+    entityType: text("entity_type"),
+    entityId: text("entity_id"),
+    summary: text("summary").notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    ipAddress: text("ip_address"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("audit_log_created_idx").on(t.createdAt),
+    index("audit_log_entity_idx").on(t.entityType, t.entityId),
+    index("audit_log_actor_idx").on(t.actorId),
+  ],
+);
+
+/** Trash: rows with deleted_at set are hidden everywhere and purged after the retention period. */
+const deletedAt = () => timestamp("deleted_at", { withTimezone: true });
+const deletedById = () => uuid("deleted_by_id").references(() => users.id, { onDelete: "set null" });
+
+/* -------------------------------------------------------------------------- */
 /* Mailboxes: the user's own sending accounts (Google Workspace, M365, SMTP). */
 /* -------------------------------------------------------------------------- */
 
@@ -73,6 +172,8 @@ export const contactLists = pgTable("contact_lists", {
   name: text("name").notNull(),
   /** Attribute columns seen on import, offered as template variables. */
   attributeColumns: jsonb("attribute_columns").$type<string[]>().notNull().default([]),
+  deletedAt: deletedAt(),
+  deletedById: deletedById(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -89,10 +190,22 @@ export const contacts = pgTable(
     lastName: text("last_name"),
     company: text("company"),
     attributes: jsonb("attributes").$type<Record<string, string>>().notNull().default({}),
+    deletedAt: deletedAt(),
+    deletedById: deletedById(),
     createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
-  (t) => [uniqueIndex("contacts_list_email_uq").on(t.listId, t.email), index("contacts_email_idx").on(t.email)],
+  (t) => [
+    // Unique among live contacts only, so re-importing someone who is in the trash works.
+    uniqueIndex("contacts_list_email_uq")
+      .on(t.listId, t.email)
+      .where(sql`deleted_at is null`),
+    index("contacts_email_idx").on(t.email),
+  ],
 );
+
+/** Index predicate for upserts against contacts_list_email_uq. */
+export const liveContactPredicate = sql`deleted_at is null`;
 
 /** Global do-not-contact list. Checked before every single send. */
 export const suppressionReason = pgEnum("suppression_reason", ["unsubscribed", "bounced", "complained", "manual"]);
@@ -137,6 +250,8 @@ export const campaigns = pgTable("campaigns", {
 
   startedAt: timestamp("started_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
+  deletedAt: deletedAt(),
+  deletedById: deletedById(),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -292,6 +407,11 @@ export const appSettings = pgTable("app_settings", {
   updatedAt: updatedAt(),
 });
 
+export type User = typeof users.$inferSelect;
+export type UserRole = (typeof userRole.enumValues)[number];
+export type Session = typeof sessions.$inferSelect;
+export type Invitation = typeof invitations.$inferSelect;
+export type AuditEntry = typeof auditLog.$inferSelect;
 export type Mailbox = typeof mailboxes.$inferSelect;
 export type ContactList = typeof contactLists.$inferSelect;
 export type Contact = typeof contacts.$inferSelect;

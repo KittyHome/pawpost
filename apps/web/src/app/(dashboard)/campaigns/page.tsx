@@ -1,9 +1,10 @@
-import { PlusIcon, SendIcon } from "lucide-react";
+import { PlusIcon, SendIcon, Trash2Icon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -14,8 +15,21 @@ import { engine } from "@/server/engine";
 
 export const metadata: Metadata = { title: "Campaigns" };
 
-export default async function CampaignsPage() {
-  const campaigns = await engine().campaigns.list();
+const STATUS_TABS = [
+  { value: "all", label: "All" },
+  { value: "active", label: "Active" },
+  { value: "draft", label: "Drafts" },
+  { value: "paused", label: "Paused" },
+  { value: "completed", label: "Completed" },
+] as const;
+
+export default async function CampaignsPage({ searchParams }: PageProps<"/campaigns">) {
+  const query = await searchParams;
+  const status = STATUS_TABS.find((t) => t.value === query.status)?.value ?? "all";
+  const [campaigns, counts] = await Promise.all([
+    engine().campaigns.list({ status: status === "all" ? undefined : status }),
+    engine().campaigns.statusCounts(),
+  ]);
 
   return (
     <>
@@ -32,7 +46,34 @@ export default async function CampaignsPage() {
         }
       />
 
-      {campaigns.length === 0 ? (
+      {query.trashed && (
+        <Alert>
+          <Trash2Icon />
+          <AlertDescription>
+            Campaign moved to the trash.{" "}
+            <Link href="/trash" className="font-medium underline underline-offset-4">
+              Open the trash
+            </Link>{" "}
+            to restore it.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {counts.all > 0 && (
+        <div className="flex flex-wrap gap-1" role="group" aria-label="Filter by status">
+          {STATUS_TABS.map((t) => (
+            <Button key={t.value} size="sm" variant={status === t.value ? "default" : "outline"} asChild>
+              <Link href={t.value === "all" ? "/campaigns" : `/campaigns?status=${t.value}`}>
+                {t.label} <span className="tabular-nums opacity-70">{counts[t.value]}</span>
+              </Link>
+            </Button>
+          ))}
+        </div>
+      )}
+
+      {campaigns.length === 0 && counts.all > 0 ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">No campaigns with this status.</p>
+      ) : campaigns.length === 0 ? (
         <Empty className="border border-dashed">
           <EmptyHeader>
             <EmptyMedia variant="icon">

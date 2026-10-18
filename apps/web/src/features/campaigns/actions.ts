@@ -15,17 +15,27 @@ const refresh = (id: string) => {
 
 export async function createCampaign(_prev: ActionState, form: FormData): Promise<ActionState> {
   let id = "";
-  const result = await runAction(async () => {
-    id = (await engine().campaigns.create(formToObject(form))).id;
+  const result = await runAction(async ({ actor }) => {
+    id = (await engine().campaigns.create(actor, formToObject(form))).id;
   });
   if (result.status !== "success") return result;
   revalidatePath("/campaigns");
   redirect(`/campaigns/${id}?tab=sequence`);
 }
 
+export async function duplicateCampaign(id: string): Promise<ActionState> {
+  let copyId = "";
+  const result = await runAction(async ({ actor }) => {
+    copyId = (await engine().campaigns.duplicate(actor, id)).id;
+  });
+  if (result.status !== "success") return result;
+  revalidatePath("/campaigns");
+  redirect(`/campaigns/${copyId}?tab=settings`);
+}
+
 export async function updateCampaignSettings(id: string, _prev: ActionState, form: FormData): Promise<ActionState> {
-  return runAction(async () => {
-    await engine().campaigns.updateSettings(id, formToObject(form, ["sendDays", "mailboxIds"]));
+  return runAction(async ({ actor }) => {
+    await engine().campaigns.updateSettings(actor, id, formToObject(form, ["sendDays", "mailboxIds"]));
     refresh(id);
     return { message: "Settings saved." };
   });
@@ -35,44 +45,45 @@ export async function saveCampaignSteps(
   id: string,
   steps: { subject: string; body: string; waitDays: number }[],
 ): Promise<ActionState> {
-  return runAction(async () => {
-    await engine().campaigns.saveSteps(id, steps);
+  return runAction(async ({ actor }) => {
+    await engine().campaigns.saveSteps(actor, id, steps);
     refresh(id);
     return { message: "Sequence saved." };
   });
 }
 
 export async function startCampaign(id: string): Promise<ActionState> {
-  return runAction(async () => {
-    const { enrolled } = await engine().campaigns.start(id);
+  return runAction(async ({ actor }) => {
+    const { enrolled } = await engine().campaigns.start(actor, id);
     refresh(id);
     return { message: `Campaign started with ${enrolled} contacts. The worker sends within your schedule.` };
   });
 }
 
 export async function pauseCampaign(id: string): Promise<ActionState> {
-  return runAction(async () => {
-    await engine().campaigns.pause(id);
+  return runAction(async ({ actor }) => {
+    await engine().campaigns.pause(actor, id);
     refresh(id);
     return { message: "Campaign paused." };
   });
 }
 
 export async function resumeCampaign(id: string): Promise<ActionState> {
-  return runAction(async () => {
-    const { newlyEnrolled } = await engine().campaigns.resume(id);
+  return runAction(async ({ actor }) => {
+    const { newlyEnrolled } = await engine().campaigns.resume(actor, id);
     refresh(id);
     return { message: newlyEnrolled ? `Resumed, and added ${newlyEnrolled} new contacts from the list.` : "Campaign resumed." };
   });
 }
 
-export async function deleteCampaign(id: string): Promise<ActionState> {
-  const result = await runAction(async () => {
-    await engine().campaigns.remove(id);
+export async function trashCampaign(id: string): Promise<ActionState> {
+  const result = await runAction(async ({ actor }) => {
+    await engine().campaigns.trash(actor, id);
   });
   if (result.status !== "success") return result;
   revalidatePath("/campaigns");
-  redirect("/campaigns");
+  revalidatePath("/trash");
+  redirect("/campaigns?trashed=1");
 }
 
 export async function generateSequence(brief: Record<string, unknown>): Promise<ActionState<GeneratedStep[]>> {

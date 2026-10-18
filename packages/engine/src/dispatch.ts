@@ -84,7 +84,10 @@ export function createDispatcher(ctx: EngineContext, mailboxService: MailboxServ
 
   /** Pauses unhealthy campaigns and completes finished ones. Returns those still running. */
   async function reviewActiveCampaigns(summary: DispatchSummary): Promise<Campaign[]> {
-    const active = await db.select().from(campaigns).where(eq(campaigns.status, "active"));
+    const active = await db
+      .select()
+      .from(campaigns)
+      .where(and(eq(campaigns.status, "active"), isNull(campaigns.deletedAt)));
     const stats = await campaignStats(
       db,
       active.map((c) => c.id),
@@ -156,9 +159,11 @@ export function createDispatcher(ctx: EngineContext, mailboxService: MailboxServ
           and(
             eq(enrollments.status, "active"),
             lte(enrollments.nextSendAt, now),
+            // Trashed contacts wait; their sequence continues if they are restored.
+            isNull(contacts.deletedAt),
             inArray(enrollments.campaignId, campaignIds),
             or(eq(enrollments.mailboxId, mailbox.id), isNull(enrollments.mailboxId)),
-            sql`not exists (select 1 from suppressions s where s.email = ${contacts.email})`,
+            sql`not exists (select 1 from suppressions s where s.email = "contacts"."email")`,
           ),
         )
         // Follow-ups already pinned to this mailbox first, then the oldest due.

@@ -42,7 +42,7 @@ Contacts who already received it continue with the following emails; anyone due 
 
 ### Can several people use Pawpost?
 
-Currently there is one admin login, set by whoever installs Pawpost. Multiple users with their own logins are planned.
+Yes. Invite teammates from **Settings → Team**; each gets their own login and a role (owner, admin or member) that decides what they can change. [Team and access](/help/team-and-access)
 
 ### Does Pawpost warm up my mailboxes?
 

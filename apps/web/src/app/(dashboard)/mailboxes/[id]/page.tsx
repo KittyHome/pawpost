@@ -1,14 +1,19 @@
 import { isDomainError } from "@pawpost/engine";
+import { can } from "@pawpost/engine/permissions";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
 import { MailboxForm } from "@/features/mailboxes/mailbox-form";
 import { engine } from "@/server/engine";
+import { requireSession } from "@/server/session";
 
 export const metadata: Metadata = { title: "Edit mailbox" };
 
 export default async function EditMailboxPage({ params }: PageProps<"/mailboxes/[id]">) {
+  const { user } = await requireSession();
+  if (!can(user.role, "mailboxes.manage")) return <NoAccess what="mailbox settings" />;
   const { id } = await params;
   const mailbox = await engine()
     .mailboxes.get(id)

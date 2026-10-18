@@ -1,7 +1,9 @@
+import { Trash2Icon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/page-header";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ImportForm } from "@/features/lists/import-form";
@@ -10,7 +12,8 @@ import { engine } from "@/server/engine";
 
 export const metadata: Metadata = { title: "Contact lists" };
 
-export default async function ListsPage() {
+export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
+  const { trashed } = await searchParams;
   const lists = await engine().lists.list();
 
   return (
@@ -20,6 +23,19 @@ export default async function ListsPage() {
         help={{ href: "/help/contact-lists", label: "Contact lists and CSV import" }}
         description="Imported recipients. Suppressed and undeliverable addresses are filtered out on import."
       />
+
+      {trashed && (
+        <Alert>
+          <Trash2Icon />
+          <AlertDescription>
+            List moved to the trash.{" "}
+            <Link href="/trash" className="font-medium underline underline-offset-4">
+              Open the trash
+            </Link>{" "}
+            to restore it.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3 py-0">

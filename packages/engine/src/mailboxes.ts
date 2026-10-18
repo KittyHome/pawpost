@@ -3,8 +3,10 @@ import { mailboxes, messages, type Mailbox } from "@pawpost/db";
 import { SmtpSendError, type ServerCredentials } from "@pawpost/mail";
 import { and, asc, count, eq, gt } from "drizzle-orm";
 
-import type { EngineContext } from "./context";
+import { writeAudit } from "./audit";
+import type { Actor, EngineContext } from "./context";
 import { recordEvent } from "./events";
+import { requirePermission } from "./guard";
 import { mailboxInput, type MailboxInput } from "./validation";
 
 export type MailboxSummary = Omit<Mailbox, "smtpPasswordEnc" | "imapPasswordEnc"> & { sentLast24h: number };
@@ -86,7 +88,8 @@ export function createMailboxService(ctx: EngineContext) {
     },
 
     /** Verifies SMTP and IMAP login before saving, so a broken mailbox never enters rotation. */
-    async create(raw: unknown): Promise<Mailbox> {
+    async create(actor: Actor, raw: unknown): Promise<Mailbox> {
+      requirePermission(actor, "mailboxes.manage");
       const input = mailboxInput.parse(raw);
       if (!input.smtpPassword) throw new DomainError("validation", "SMTP password is required.");
       const smtpPassword = input.smtpPassword;
@@ -125,10 +128,17 @@ export function createMailboxService(ctx: EngineContext) {
         })
         .returning();
       ctx.logger.info("mailbox connected", { mailboxId: created!.id, email: created!.email });
+      await writeAudit(db, actor, {
+        action: "mailbox.connected",
+        summary: `${actor.email} connected mailbox ${created!.email}`,
+        entityType: "mailbox",
+        entityId: created!.id,
+      });
       return created!;
     },
 
-    async update(id: string, raw: unknown): Promise<Mailbox> {
+    async update(actor: Actor, id: string, raw: unknown): Promise<Mailbox> {
+      requirePermission(actor, "mailboxes.manage");
       const input = mailboxInput.parse(raw);
       const current = await find(id);
       const stored = credentials(current);
@@ -176,11 +186,18 @@ export function createMailboxService(ctx: EngineContext) {
         })
         .where(eq(mailboxes.id, id))
         .returning();
+      await writeAudit(db, actor, {
+        action: "mailbox.updated",
+        summary: `${actor.email} updated mailbox ${updated!.email}${input.smtpPassword ? " (new password)" : ""}`,
+        entityType: "mailbox",
+        entityId: id,
+      });
       return updated!;
     },
 
     /** Re-checks a saved mailbox. A passing test takes it out of the error state. */
-    async test(id: string): Promise<ConnectionTestResult> {
+    async test(actor: Actor, id: string): Promise<ConnectionTestResult> {
+      requirePermission(actor, "mailboxes.manage");
       const mailbox = await find(id);
       const creds = credentials(mailbox);
       const result = await testCredentials(creds.smtp, creds.imap);
@@ -200,7 +217,8 @@ export function createMailboxService(ctx: EngineContext) {
       return result;
     },
 
-    async setPaused(id: string, paused: boolean): Promise<void> {
+    async setPaused(actor: Actor, id: string, paused: boolean): Promise<void> {
+      requirePermission(actor, "mailboxes.manage");
       const mailbox = await find(id);
       if (!paused && mailbox.status === "error") {
         throw new DomainError("invalid_state", "Fix the connection problem and run a test before resuming this mailbox.");
@@ -209,6 +227,12 @@ export function createMailboxService(ctx: EngineContext) {
         .update(mailboxes)
         .set({ status: paused ? "paused" : "active" })
         .where(eq(mailboxes.id, id));
+      await writeAudit(db, actor, {
+        action: paused ? "mailbox.paused" : "mailbox.resumed",
+        summary: `${actor.email} ${paused ? "paused" : "resumed"} mailbox ${mailbox.email}`,
+        entityType: "mailbox",
+        entityId: id,
+      });
     },
 
     /** Called by the dispatcher when the provider rejects the account itself. */
@@ -218,9 +242,18 @@ export function createMailboxService(ctx: EngineContext) {
       ctx.logger.warn("mailbox disabled", { mailboxId: id, error });
     },
 
-    async remove(id: string): Promise<void> {
-      await find(id);
-      await db.delete(mailboxes).where(eq(mailboxes.id, id));
+    async remove(actor: Actor, id: string): Promise<void> {
+      requirePermission(actor, "mailboxes.manage");
+      const mailbox = await find(id);
+      await db.transaction(async (tx) => {
+        await tx.delete(mailboxes).where(eq(mailboxes.id, id));
+        await writeAudit(tx, actor, {
+          action: "mailbox.removed",
+          summary: `${actor.email} removed mailbox ${mailbox.email}`,
+          entityType: "mailbox",
+          entityId: id,
+        });
+      });
     },
   };
 }

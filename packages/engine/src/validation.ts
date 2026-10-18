@@ -99,3 +99,81 @@ export const suppressionInput = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address.")),
   note: trimmed(300).optional(),
 });
+
+/* -------------------------------------------------------------------------- */
+/* Accounts                                                                   */
+/* -------------------------------------------------------------------------- */
+
+const emailField = z.string().trim().toLowerCase().pipe(z.email("Enter a valid email address."));
+const nameField = required("Name", 100);
+/** Strength rules are checked on the server (see core passwordProblem). */
+const newPassword = z.string().min(1, "Choose a password.").max(200, "Use at most 200 characters.");
+const roleField = z.enum(["admin", "member"], { message: "Choose a role." });
+
+export const setupInput = z.object({
+  name: nameField,
+  email: emailField,
+  password: newPassword,
+  setupToken: z.string().optional(),
+});
+
+export const signInInput = z.object({
+  email: emailField,
+  password: z.string().min(1, "Enter your password.").max(200),
+});
+
+export const profileInput = z.object({
+  name: nameField,
+  email: emailField,
+});
+
+export const changePasswordInput = z.object({
+  currentPassword: z.string().min(1, "Enter your current password."),
+  newPassword,
+});
+
+export const inviteInput = z.object({
+  email: emailField,
+  role: roleField,
+});
+
+export const acceptInviteInput = z.object({
+  name: nameField,
+  password: newPassword,
+});
+
+export const resetPasswordInput = z.object({
+  password: newPassword,
+});
+
+export const roleChangeInput = z.object({
+  role: z.enum(["owner", "admin", "member"]),
+});
+
+/* -------------------------------------------------------------------------- */
+/* Contacts                                                                   */
+/* -------------------------------------------------------------------------- */
+
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((v) => (v ? v : null));
+
+export const contactInput = z.object({
+  email: emailField,
+  firstName: optionalText(100),
+  lastName: optionalText(100),
+  company: optionalText(200),
+  /** Custom fields, keyed by column name. Empty values are dropped. */
+  attributes: z
+    .record(z.string().trim().min(1).max(100), z.string().trim().max(1000))
+    .default({})
+    .transform((a) => Object.fromEntries(Object.entries(a).filter(([, v]) => v !== ""))),
+});
+export type ContactInput = z.infer<typeof contactInput>;
+
+export const contactSort = z.enum(["email", "name", "company", "created"]).catch("email");
+export const sortDirection = z.enum(["asc", "desc"]).catch("asc");

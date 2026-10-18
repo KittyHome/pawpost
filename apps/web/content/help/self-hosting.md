@@ -32,6 +32,11 @@ docker compose up -d
 
 This starts PostgreSQL, the worker (which sets up the database on first start) and the web app on port 3000.
 
+Open the app and create the **owner account** on the setup page, then invite your team from **Settings → Team**. [Team and access](/help/team-and-access)
+
+> [!WARNING]
+> Until the owner account exists, anyone who can reach the app can create it. Do it right after deploying, or set `SETUP_TOKEN` (or `ADMIN_EMAIL` and `ADMIN_PASSWORD`) so nobody else can.
+
 Put the web app behind **HTTPS** with a reverse proxy (Caddy, nginx, Traefik) or your hosting platform's load balancer, on a domain such as `outreach.yourcompany.com`.
 
 > [!IMPORTANT]
@@ -41,21 +46,24 @@ Put the web app behind **HTTPS** with a reverse proxy (Caddy, nginx, Traefik) or
 
 Settings are environment variables in the `.env` file.
 
-| Variable                      | Required | Purpose                                                                                       |
-| ----------------------------- | -------- | --------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                | Yes      | PostgreSQL connection string (set automatically by Docker Compose)                            |
-| `APP_URL`                     | Yes      | Public HTTPS address of the web app                                                           |
-| `APP_SECRET`                  | Yes      | At least 32 random characters. Encrypts stored passwords and API keys, and signs logins       |
-| `ADMIN_EMAIL`                 | Yes      | Login email for the dashboard                                                                 |
-| `ADMIN_PASSWORD`              | Yes      | Login password (8+ characters; use a long random one)                                         |
-| `OPENAI_API_KEY`              | No       | Default AI key. A key saved in Settings → AI overrides it                                     |
-| `OPENAI_MODEL`                | No       | Default AI model                                                                              |
-| `OPENAI_BASE_URL`             | No       | For OpenAI-compatible gateways                                                                |
-| `OPENAI_PROXY_URL`            | No       | HTTP(S) proxy for AI requests only, e.g. `http://127.0.0.1:7890`. Falls back to `HTTPS_PROXY` |
-| `DISPATCH_INTERVAL_SECONDS`   | No       | How often the worker looks for due emails (default 20)                                        |
-| `INBOX_SYNC_INTERVAL_SECONDS` | No       | How often each inbox is read (default 120)                                                    |
-| `SMTP_ALLOW_SELF_SIGNED`      | No       | `true` to accept self-signed certificates from your own SMTP server                           |
-| `LOG_LEVEL`                   | No       | `debug`, `info` (default), `warn` or `error`                                                  |
+| Variable                      | Required | Purpose                                                                                                                                      |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                | Yes      | PostgreSQL connection string (set automatically by Docker Compose)                                                                           |
+| `APP_URL`                     | Yes      | Public HTTPS address of the web app                                                                                                          |
+| `APP_SECRET`                  | Yes      | At least 32 random characters. Encrypts stored passwords and API keys, and signs logins                                                      |
+| `ADMIN_EMAIL`                 | No       | Creates the owner account on first start (otherwise the first visitor sets it up in the browser)                                             |
+| `ADMIN_PASSWORD`              | No       | Password for that owner account; change it after signing in                                                                                  |
+| `SETUP_TOKEN`                 | No       | When set, the first-run setup page asks for this value, so nobody else can claim the owner account first                                     |
+| `SYSTEM_SMTP_URL`             | No       | SMTP connection for invitation and password-reset emails, e.g. `smtps://user:pass@smtp.example.com:465`. Without it, links are shown to copy |
+| `SYSTEM_EMAIL_FROM`           | No       | Sender for those emails, e.g. `Pawpost <no-reply@example.com>`                                                                               |
+| `OPENAI_API_KEY`              | No       | Default AI key. A key saved in Settings → AI overrides it                                                                                    |
+| `OPENAI_MODEL`                | No       | Default AI model                                                                                                                             |
+| `OPENAI_BASE_URL`             | No       | For OpenAI-compatible gateways                                                                                                               |
+| `OPENAI_PROXY_URL`            | No       | HTTP(S) proxy for AI requests only, e.g. `http://127.0.0.1:7890`. Falls back to `HTTPS_PROXY`                                                |
+| `DISPATCH_INTERVAL_SECONDS`   | No       | How often the worker looks for due emails (default 20)                                                                                       |
+| `INBOX_SYNC_INTERVAL_SECONDS` | No       | How often each inbox is read (default 120)                                                                                                   |
+| `SMTP_ALLOW_SELF_SIGNED`      | No       | `true` to accept self-signed certificates from your own SMTP server                                                                          |
+| `LOG_LEVEL`                   | No       | `debug`, `info` (default), `warn` or `error`                                                                                                 |
 
 Generate a secret with:
 

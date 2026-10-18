@@ -7,7 +7,7 @@
 import { createMailSender } from "@pawpost/mail";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { createEngine, type Engine } from "../src";
+import { createEngine, type Actor, type Engine } from "../src";
 import { controllableClock, fakeAi, scriptedInbox, startSmtpServer, startTestDatabase } from "./support";
 
 const MINUTE = 60_000;
@@ -23,6 +23,7 @@ describe("engine end to end", () => {
   const clock = controllableClock(new Date("2026-10-13T10:00:00Z"));
   let campaignId = "";
   let mailboxId = "";
+  let owner: Actor;
 
   beforeAll(async () => {
     [database, smtp] = await Promise.all([startTestDatabase(), startSmtpServer({ rejectRecipients: ["gone@acme.test"] })]);
@@ -36,6 +37,11 @@ describe("engine end to end", () => {
       clock: clock.now,
       ai: { provider: ai },
     });
+    const { user } = await engine.accounts.setupOwner(
+      { name: "Olivia Owner", email: "owner@pawpost.test", password: "tulip-orbit-cadence" },
+      { ip: "127.0.0.1" },
+    );
+    owner = { ...user, ip: "127.0.0.1" };
   }, 120_000);
 
   afterAll(async () => {
@@ -44,7 +50,7 @@ describe("engine end to end", () => {
   });
 
   it("connects a mailbox only after SMTP and IMAP login succeed", async () => {
-    const mailbox = await engine.mailboxes.create({
+    const mailbox = await engine.mailboxes.create(owner, {
       email: "Sam@Send.Test",
       fromName: "Sam Lee",
       smtpHost: "127.0.0.1",
@@ -64,9 +70,9 @@ describe("engine end to end", () => {
   });
 
   it("imports a CSV, rejecting unusable rows with reasons", async () => {
-    const list = await engine.lists.create({ name: "Test list" });
-    const report = await engine.lists.importCsv(
-      list.id,
+    const report = await engine.lists.createFromCsv(
+      owner,
+      "Test list",
       [
         "Name,Email,City",
         "Ann Smith,ann@acme.test,Oslo",
@@ -85,18 +91,18 @@ describe("engine end to end", () => {
     });
     expect(report.rejectedSample.map((r) => r.line)).toEqual([6, 7, 8]);
 
-    const campaign = await engine.campaigns.create({ name: "Launch", listId: list.id });
+    const campaign = await engine.campaigns.create(owner, { name: "Launch", listId: report.listId });
     campaignId = campaign.id;
   });
 
   it("refuses to start until compliance and copy checks pass", async () => {
-    await expect(engine.campaigns.start(campaignId)).rejects.toThrow(/postal address/);
+    await expect(engine.campaigns.start(owner, campaignId)).rejects.toThrow(/postal address/);
     const check = await engine.campaigns.preflight(campaignId);
     expect(check.errors.join("\n")).toMatch(/placeholder text/);
   });
 
   it("starts and sends at most one email per mailbox per slot, even with parallel workers", async () => {
-    await engine.campaigns.updateSettings(campaignId, {
+    await engine.campaigns.updateSettings(owner, campaignId, {
       name: "Launch",
       listId: (await engine.campaigns.get(campaignId)).listId,
       timezone: "UTC",
@@ -107,7 +113,7 @@ describe("engine end to end", () => {
       stopOnReply: "on",
       mailboxIds: [mailboxId],
     });
-    await engine.campaigns.saveSteps(campaignId, [
+    await engine.campaigns.saveSteps(owner, campaignId, [
       {
         subject: "Idea for {{company|your team}}",
         body: "Hi {{firstName|there}},\n\nOne question about {{City|your city}}.\n\n{{senderFirstName}}",
@@ -115,7 +121,7 @@ describe("engine end to end", () => {
       },
       { subject: "", body: "Hi {{firstName|there}}, following up once.", waitDays: 4 },
     ]);
-    expect(await engine.campaigns.start(campaignId)).toEqual({ enrolled: 4 });
+    expect(await engine.campaigns.start(owner, campaignId)).toEqual({ enrolled: 4 });
 
     const [a, b] = await Promise.all([engine.dispatch(), engine.dispatch()]);
     expect(a.sent + a.bounced + b.sent + b.bounced).toBe(1);
@@ -226,6 +232,7 @@ describe("engine end to end", () => {
 
   it("imports names in any script and stores them unchanged", async () => {
     const report = await engine.lists.createFromCsv(
+      owner,
       "International",
       ["Name,Email,City", "谋 李,li@intl.test,北京", "محمد علي,ali@intl.test,القاهرة", "Zoë Ångström,zoe@intl.test,Malmö"].join(
         "\n",
@@ -245,7 +252,7 @@ describe("engine end to end", () => {
 
   it("creates no list when the file can't be imported", async () => {
     const before = (await engine.lists.list()).length;
-    await expect(engine.lists.createFromCsv("Broken", "Name,Phone\nAnn,123", {})).rejects.toThrow(/No email column/);
+    await expect(engine.lists.createFromCsv(owner, "Broken", "Name,Phone\nAnn,123", {})).rejects.toThrow(/No email column/);
     expect((await engine.lists.list()).length).toBe(before);
   });
 });

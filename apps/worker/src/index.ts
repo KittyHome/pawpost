@@ -9,12 +9,13 @@ import { createLogger } from "@pawpost/core";
 import { createDatabase } from "@pawpost/db";
 import { runMigrations } from "@pawpost/db/migrate";
 import { createEngine } from "@pawpost/engine";
-import { createMailSender } from "@pawpost/mail";
+import { createMailSender, createSystemMailer } from "@pawpost/mail";
 
 import { readEnv } from "./env";
 import { runLoop } from "./loop";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
+const TRASH_PURGE_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
 const env = readEnv();
 const logger = createLogger({ service: "worker" });
@@ -34,6 +35,7 @@ const engine = createEngine({
   appUrl: env.APP_URL,
   logger,
   sender: createMailSender({ allowSelfSignedCertificates: env.SMTP_ALLOW_SELF_SIGNED }),
+  systemMailer: env.SYSTEM_SMTP_URL ? createSystemMailer({ url: env.SYSTEM_SMTP_URL, from: env.SYSTEM_EMAIL_FROM }) : null,
   ai: {
     openaiApiKey: env.OPENAI_API_KEY,
     openaiModel: env.OPENAI_MODEL,
@@ -41,6 +43,11 @@ const engine = createEngine({
     proxyUrl: env.OPENAI_PROXY_URL ?? env.HTTPS_PROXY,
   },
 });
+
+// Unattended installs: create the owner from ADMIN_EMAIL / ADMIN_PASSWORD if nobody exists yet.
+if (await engine.accounts.bootstrapOwner({ email: env.ADMIN_EMAIL, password: env.ADMIN_PASSWORD })) {
+  logger.info("owner account created from ADMIN_EMAIL; change its password after signing in");
+}
 
 const controller = new AbortController();
 const { signal } = controller;
@@ -67,6 +74,16 @@ const loops = Promise.all([
     async () => {
       const summary = await engine.syncInboxes({ intervalMs: env.INBOX_SYNC_INTERVAL_SECONDS * 1000 });
       if (summary.processed || summary.errors) logger.info("inbox sync", { ...summary });
+    },
+    logger,
+    signal,
+  ),
+  runLoop(
+    "trash",
+    TRASH_PURGE_INTERVAL_MS,
+    async () => {
+      const purged = await engine.trash.purgeExpired();
+      if (purged.campaigns + purged.lists + purged.contacts) logger.info("trash purged", { ...purged });
     },
     logger,
     signal,

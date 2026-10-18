@@ -9,14 +9,15 @@ import { requireSession } from "@/server/session";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
-  const session = await requireSession();
-  const worker = await engine().system.workerStatus();
+  const { user } = await requireSession();
+  const [worker, trashCount] = await Promise.all([engine().system.workerStatus(), engine().trash.count()]);
 
   return (
     <SidebarProvider>
       <AppSidebar
-        userEmail={session.email}
+        user={{ name: user.name, email: user.email, role: user.role }}
         worker={{ online: worker.online, lastSeenAt: worker.lastSeenAt?.toISOString() ?? null }}
+        trashCount={trashCount}
         logoutAction={logout}
       />
       <SidebarInset>

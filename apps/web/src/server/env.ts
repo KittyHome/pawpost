@@ -11,8 +11,14 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   APP_URL: z.url("APP_URL must be the public URL of this app"),
   APP_SECRET: z.string().min(32, "APP_SECRET must be at least 32 characters"),
-  ADMIN_EMAIL: z.string().trim().toLowerCase().pipe(z.email("ADMIN_EMAIL must be an email address")),
-  ADMIN_PASSWORD: z.string().min(8, "ADMIN_PASSWORD must be at least 8 characters"),
+  /** Optional: creates the owner on first start, for unattended installs. */
+  ADMIN_EMAIL: optional,
+  ADMIN_PASSWORD: optional,
+  /** Optional: when set, the first-run setup page asks for this value. */
+  SETUP_TOKEN: optional,
+  /** Optional: SMTP connection URL for invitation and password reset emails. */
+  SYSTEM_SMTP_URL: optional,
+  SYSTEM_EMAIL_FROM: z.string().trim().default("Pawpost <no-reply@localhost>"),
   OPENAI_API_KEY: optional,
   OPENAI_MODEL: optional,
   OPENAI_BASE_URL: optional,

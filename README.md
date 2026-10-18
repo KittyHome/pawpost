@@ -8,6 +8,9 @@ Self-hosted, source-available cold email outreach. You bring your own mailboxes 
 - **Compliance built in.** Every email carries a postal address, an unsubscribe link and RFC 8058 one-click unsubscribe headers. Opt-outs and bounces go on a global suppression list that is checked before every send.
 - **Automatic brakes.** A campaign pauses itself when bounces pass 2% or unsubscribes pass 5%.
 - **List hygiene on import.** Duplicates, invalid addresses, role inboxes (info@, sales@), suppressed addresses and domains that can't receive mail are rejected with reasons.
+- **A team, not a login.** Owner, admin and member roles; invitations by link; server-side sessions you can review and revoke; account lockout after repeated failed sign-ins.
+- **Data you can manage.** Edit contacts and use bulk actions (move, copy, suppress, trash), CSV exports, a 30-day trash with restore, and one-step erasure of a person for privacy requests.
+- **Audit log.** Every sign-in and change is recorded with who, when and from which IP.
 - **Built-in help center.** Searchable step-by-step guides for every feature, with "?" links from each page and tricky field straight to the right section.
 - **AI assist (optional, OpenAI).** Draft a sequence from a short brief, review an email for spam signals before sending, and triage replies (interested, question, not now, opt-out…).
 
@@ -46,8 +49,9 @@ To send to the local sink, connect a mailbox with host `127.0.0.1`, port `2525`,
 ## Self-hosting
 
 ```bash
-cp .env.example .env   # set APP_URL (public https URL), APP_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
+cp .env.example .env   # set APP_URL (public https URL) and APP_SECRET
 docker compose up -d
+# open the app and create the owner account, then invite your team in Settings → Team
 ```
 
 This runs Postgres, the worker (applies migrations on start) and the web app on port 3000. Put the web app behind HTTPS. Unsubscribe links point at `APP_URL`, so it must be reachable by recipients.
@@ -70,7 +74,9 @@ All settings are environment variables; see [.env.example](.env.example).
 | `DATABASE_URL`                                             | PostgreSQL connection string                                           |
 | `APP_URL`                                                  | Public URL of the dashboard, used in unsubscribe links                 |
 | `APP_SECRET`                                               | 32+ characters. Encrypts stored passwords and API keys, signs sessions |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD`                            | Dashboard login                                                        |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`                            | Optional: create the owner account on first start                      |
+| `SETUP_TOKEN`                                              | Optional: required on the first-run setup page                         |
+| `SYSTEM_SMTP_URL`, `SYSTEM_EMAIL_FROM`                     | Optional: email invitations and password resets                        |
 | `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_BASE_URL`        | Optional AI defaults; a key saved in Settings takes precedence         |
 | `OPENAI_PROXY_URL`                                         | HTTP(S) proxy for OpenAI calls only (falls back to `HTTPS_PROXY`)      |
 | `DISPATCH_INTERVAL_SECONDS`, `INBOX_SYNC_INTERVAL_SECONDS` | Worker pacing                                                          |
@@ -97,7 +103,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 - Mailbox warm-up (gradual daily ramp, then an opt-in warm-up network)
 - More AI providers behind the same interface
-- Multi-user accounts and roles
+- Sign in with Google / Microsoft (OAuth), and OAuth for Microsoft 365 mailboxes
 - Per-contact AI personalisation of the first line
 - Open/click tracking as an opt-in (off by default; it hurts deliverability)
 

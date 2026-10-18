@@ -1,3 +1,4 @@
+import { can } from "@pawpost/engine/permissions";
 import { InboxIcon, PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,10 +14,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MailboxRowActions } from "@/features/mailboxes/mailbox-row-actions";
 import { formatRelative } from "@/lib/format";
 import { engine } from "@/server/engine";
+import { requireSession } from "@/server/session";
 
 export const metadata: Metadata = { title: "Mailboxes" };
 
 export default async function MailboxesPage() {
+  const { user } = await requireSession();
+  const manage = can(user.role, "mailboxes.manage");
   const mailboxes = await engine().mailboxes.list();
 
   return (
@@ -26,11 +30,13 @@ export default async function MailboxesPage() {
         help={{ href: "/help/mailboxes", label: "Connecting mailboxes" }}
         description="Your own sending accounts. Campaigns rotate between them and respect each one's daily limit."
         actions={
-          <Button asChild>
-            <Link href="/mailboxes/new">
-              <PlusIcon /> Connect mailbox
-            </Link>
-          </Button>
+          manage ? (
+            <Button asChild>
+              <Link href="/mailboxes/new">
+                <PlusIcon /> Connect mailbox
+              </Link>
+            </Button>
+          ) : null
         }
       />
 
@@ -96,9 +102,7 @@ export default async function MailboxesPage() {
                       formatRelative(m.lastSyncedAt)
                     )}
                   </TableCell>
-                  <TableCell>
-                    <MailboxRowActions id={m.id} email={m.email} status={m.status} />
-                  </TableCell>
+                  <TableCell>{manage && <MailboxRowActions id={m.id} email={m.email} status={m.status} />}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -30,6 +30,13 @@ const schema = z.object({
   OPENAI_PROXY_URL: optional,
   HTTPS_PROXY: optional,
 
+  /** Optional: creates the owner account on first start when no users exist. */
+  ADMIN_EMAIL: optional,
+  ADMIN_PASSWORD: optional,
+  /** Optional: SMTP connection URL for invitation and password reset emails. */
+  SYSTEM_SMTP_URL: optional,
+  SYSTEM_EMAIL_FROM: z.string().trim().default("Pawpost <no-reply@localhost>"),
+
   DISPATCH_INTERVAL_SECONDS: z.coerce.number().int().min(5).max(600).default(20),
   INBOX_SYNC_INTERVAL_SECONDS: z.coerce.number().int().min(30).max(3600).default(120),
   RUN_MIGRATIONS: z

@@ -1,4 +1,5 @@
 import { isDomainError } from "@pawpost/engine";
+import { can } from "@pawpost/engine/permissions";
 import {
   CircleAlertIcon,
   MailWarningIcon,
@@ -28,6 +29,7 @@ import { SequenceEditor } from "@/features/campaigns/sequence-editor";
 import { CampaignSettingsForm } from "@/features/campaigns/settings-form";
 import { formatNumber, formatPercent, formatRelative } from "@/lib/format";
 import { engine } from "@/server/engine";
+import { requireSession } from "@/server/session";
 
 export const metadata: Metadata = { title: "Campaign" };
 
@@ -41,6 +43,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
   const statusFilter = ENROLLMENT_FILTERS.find((f) => f === query.status) ?? "all";
   const page = Number(query.page) || 1;
 
+  const { user } = await requireSession();
   const e = engine();
   const campaign = await e.campaigns.get(id).catch((error: unknown) => {
     if (isDomainError(error)) notFound();
@@ -80,6 +83,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
           <CampaignControls
             campaignId={id}
             status={campaign.status}
+            canExport={can(user.role, "data.export")}
             contactCount={list?.contactCount ?? 0}
             canStart={preflight.errors.length === 0}
           />
