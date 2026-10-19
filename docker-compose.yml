@@ -1,5 +1,6 @@
 # Self-hosting: cp .env.example .env, fill in APP_URL, APP_SECRET and the admin
 # login, then `docker compose up -d`. The worker applies database migrations on start.
+# For a domain with HTTPS, run `bash scripts/setup-domain.sh <your-domain>`.
 services:
   postgres:
     image: postgres:17-alpine
@@ -37,12 +38,34 @@ services:
     environment:
       DATABASE_URL: postgres://pawpost:${POSTGRES_PASSWORD:-pawpost}@postgres:5432/pawpost
     ports:
-      - "3000:3000"
+      # Behind Caddy this is 127.0.0.1, so plain HTTP isn't reachable from outside.
+      - "${WEB_BIND_ADDRESS:-0.0.0.0}:3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
       worker:
         condition: service_started
 
+  # HTTPS for your domain. Started only when COMPOSE_PROFILES includes "https"
+  # (scripts/setup-domain.sh sets this up).
+  caddy:
+    image: caddy:2-alpine
+    profiles: [https]
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:

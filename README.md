@@ -49,12 +49,20 @@ To send to the local sink, connect a mailbox with host `127.0.0.1`, port `2525`,
 ## Self-hosting
 
 ```bash
-cp .env.example .env   # set APP_URL (public https URL) and APP_SECRET
+cp .env.example .env   # set APP_SECRET and the admin login
 docker compose up -d
 # open the app and create the owner account, then invite your team in Settings → Team
 ```
 
-This runs Postgres, the worker (applies migrations on start) and the web app on port 3000. Put the web app behind HTTPS. Unsubscribe links point at `APP_URL`, so it must be reachable by recipients.
+This runs Postgres, the worker (applies migrations on start) and the web app on port 3000.
+
+**Domain and HTTPS.** Point a DNS A record at the server, then run:
+
+```bash
+bash scripts/setup-domain.sh app.example.com
+```
+
+It checks DNS and ports, sets `APP_URL` and the related settings in `.env`, and starts Caddy, which gets and renews a Let's Encrypt certificate. Do this before sending: unsubscribe links point at `APP_URL`, and links to a bare IP address push emails into spam. To use your own reverse proxy instead, forward HTTPS to port 3000 and set `APP_URL` yourself.
 
 The images can also run separately on any container host:
 
@@ -81,6 +89,7 @@ All settings are environment variables; see [.env.example](.env.example).
 | `OPENAI_PROXY_URL`                                         | HTTP(S) proxy for OpenAI calls only (falls back to `HTTPS_PROXY`)      |
 | `DISPATCH_INTERVAL_SECONDS`, `INBOX_SYNC_INTERVAL_SECONDS` | Worker pacing                                                          |
 | `SMTP_ALLOW_SELF_SIGNED`                                   | Accept self-signed certificates from your SMTP server                  |
+| `DOMAIN`, `COMPOSE_PROFILES`, `WEB_BIND_ADDRESS`           | Built-in HTTPS with Caddy; set by `scripts/setup-domain.sh`            |
 
 ## Mailbox setup tips
 

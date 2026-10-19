@@ -1,4 +1,13 @@
-import { BanIcon, CircleCheckIcon, CircleIcon, MailWarningIcon, MessageSquareReplyIcon, SendIcon } from "lucide-react";
+import { checkPublicUrl } from "@pawpost/core";
+import {
+  BanIcon,
+  CircleCheckIcon,
+  CircleIcon,
+  GlobeLockIcon,
+  MailWarningIcon,
+  MessageSquareReplyIcon,
+  SendIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -11,10 +20,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber, formatPercent } from "@/lib/format";
 import { engine } from "@/server/engine";
+import { env } from "@/server/env";
 
 export const metadata: Metadata = { title: "Overview" };
 
 export default async function OverviewPage() {
+  const publicUrl = checkPublicUrl(env().APP_URL);
   const e = engine();
   const [overview, activity, mailboxes, lists, campaigns, worker] = await Promise.all([
     e.stats.overview(),
@@ -54,6 +65,16 @@ export default async function OverviewPage() {
           <AlertDescription>
             Nothing is sent and no replies are read until it is. Nothing is lost: due emails wait.{" "}
             <LearnMore href="/help/troubleshooting#the-worker-is-offline">How to start the worker</LearnMore>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {publicUrl.problem && publicUrl.problem !== "localhost" && (
+        <Alert>
+          <GlobeLockIcon />
+          <AlertTitle>Set up a domain before sending</AlertTitle>
+          <AlertDescription>
+            {publicUrl.message} <LearnMore href="/help/self-hosting#your-domain-and-https">How to set up a domain</LearnMore>
           </AlertDescription>
         </Alert>
       )}

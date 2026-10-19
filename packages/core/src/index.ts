@@ -6,6 +6,7 @@ export * from "./health";
 export * from "./logger";
 export * from "./optout";
 export * from "./passwords";
+export * from "./public-url";
 export * from "./schedule";
 export * from "./secrets";
 export * from "./template";

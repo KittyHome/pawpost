@@ -1,4 +1,5 @@
 import {
+  checkPublicUrl,
   DomainError,
   formatMinuteOfDay,
   lintTemplate,
@@ -139,6 +140,9 @@ export function createCampaignService(ctx: EngineContext) {
       warnings.push(`${m.email} has a connection error and won't send.`);
 
     if (list && !contactCount?.n) errors.push("The contact list is empty.");
+
+    const publicUrl = checkPublicUrl(ctx.appUrl);
+    if (publicUrl.message) warnings.push(publicUrl.message);
 
     return { errors, warnings };
   }

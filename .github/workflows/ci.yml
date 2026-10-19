@@ -24,3 +24,23 @@ jobs:
       # Typecheck, lint, and unit + integration tests (the engine suite starts a real Postgres).
       - run: pnpm check
       - run: pnpm build
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash -n scripts/setup-domain.sh
+      - name: Compose file is valid, with and without HTTPS
+        run: |
+          cp .env.example .env
+          docker compose config -q
+          printf 'DOMAIN=app.example.com\nCOMPOSE_PROFILES=https\nWEB_BIND_ADDRESS=127.0.0.1\n' >> .env
+          docker compose config --services | grep -qx caddy
+      - name: Caddyfile is valid
+        run: >
+          docker run --rm -e DOMAIN=app.example.com
+          -v "$PWD/deploy/Caddyfile:/etc/caddy/Caddyfile:ro"
+          caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      - run: docker build --target web -t pawpost-web .
+      - run: docker build --target worker -t pawpost-worker .

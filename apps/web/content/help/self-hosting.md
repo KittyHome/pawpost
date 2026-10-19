@@ -3,7 +3,7 @@ title: Installing and running Pawpost
 description: Install with Docker, configure it, keep it updated and backed up. For whoever runs the server.
 category: admin
 order: 1
-keywords: install, self-host, docker, compose, server, configuration, environment, env, app_url, app_secret, admin password, update, upgrade, backup, restore, health, worker, proxy
+keywords: install, self-host, docker, compose, server, configuration, environment, env, app_url, app_secret, admin password, update, upgrade, backup, restore, health, worker, proxy, domain, https, ssl, tls, certificate, caddy, dns, a record, lets encrypt
 ---
 
 This page is for the person who installs and maintains Pawpost. If someone else runs it for you, you can skip it.
@@ -37,10 +37,34 @@ Open the app and create the **owner account** on the setup page, then invite you
 > [!WARNING]
 > Until the owner account exists, anyone who can reach the app can create it. Do it right after deploying, or set `SETUP_TOKEN` (or `ADMIN_EMAIL` and `ADMIN_PASSWORD`) so nobody else can.
 
-Put the web app behind **HTTPS** with a reverse proxy (Caddy, nginx, Traefik) or your hosting platform's load balancer, on a domain such as `outreach.yourcompany.com`.
-
 > [!IMPORTANT]
-> Unsubscribe links in every email point to `APP_URL`. It must be a public address that recipients can open from anywhere, not `localhost`.
+> Unsubscribe links in every email point to `APP_URL`. It must be a public address that recipients can open from anywhere, not `localhost`. Before sending, put Pawpost on a domain with HTTPS (next section).
+
+## Your domain and HTTPS
+
+Every email links to Pawpost's address (the unsubscribe link and Gmail's one-click unsubscribe button). Spam filters distrust links to bare IP addresses like `http://203.0.113.7:3000`, and Gmail expects HTTPS, so use a domain before sending real email. HTTPS also encrypts your team's sign-ins.
+
+Pawpost includes [Caddy](https://caddyserver.com), which gets a free certificate from Let's Encrypt and renews it automatically. Setup takes two steps:
+
+1. **Point a domain at the server.** At your domain's DNS provider, create an **A record**, for example `app` on your outreach domain, with the server's IP address as the value. Use your outreach domain rather than your main company domain, so a reputation problem with outreach can't affect your company's own email. If you use Cloudflare, set the record to **DNS only** (grey cloud).
+2. **Run the setup script** on the server, in the Pawpost folder:
+
+   ```bash
+   bash scripts/setup-domain.sh app.yourdomain.com
+   ```
+
+The script checks that the domain points to this server and that ports 80 and 443 are free. It then sets `DOMAIN`, `APP_URL`, `COMPOSE_PROFILES` and `WEB_BIND_ADDRESS` in `.env` (keeping a backup), starts Caddy, and waits until `https://app.yourdomain.com` works. Sign in at the new address afterwards. Port 3000 is then only reachable from the server itself, so nobody can bypass HTTPS.
+
+> [!TIP]
+> **Settings → General** shows whether the public URL is ready for sending. The Overview page and each campaign's pre-start checks warn you when it isn't.
+
+If the script stops, it says why. The usual causes:
+
+- **The DNS record is new.** It can take a few minutes, occasionally an hour, to appear everywhere. Wait and run the script again.
+- **Ports 80 and 443 are blocked.** Open them in your hosting provider's firewall panel, and on the server if it uses ufw: `ufw allow 80/tcp && ufw allow 443`.
+- **Something else uses port 80 or 443**, such as nginx or Apache. Stop it, or use that web server as the reverse proxy instead.
+
+To use your own reverse proxy (nginx, Traefik, a cloud load balancer), skip the script. Forward HTTPS traffic to port 3000 and set `APP_URL` to the public HTTPS address yourself.
 
 ## Configuration reference
 
@@ -64,6 +88,9 @@ Settings are environment variables in the `.env` file.
 | `INBOX_SYNC_INTERVAL_SECONDS` | No       | How often each inbox is read (default 120)                                                                                                   |
 | `SMTP_ALLOW_SELF_SIGNED`      | No       | `true` to accept self-signed certificates from your own SMTP server                                                                          |
 | `LOG_LEVEL`                   | No       | `debug`, `info` (default), `warn` or `error`                                                                                                 |
+| `DOMAIN`                      | No       | Domain Caddy serves with HTTPS. Set by `scripts/setup-domain.sh`                                                                             |
+| `COMPOSE_PROFILES`            | No       | `https` starts the Caddy container. Set by `scripts/setup-domain.sh`                                                                         |
+| `WEB_BIND_ADDRESS`            | No       | Where port 3000 listens: `0.0.0.0` (default, everywhere) or `127.0.0.1` (only the server itself, used behind Caddy)                          |
 
 Generate a secret with:
 

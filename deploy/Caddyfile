@@ -1,0 +1,8 @@
+# HTTPS in front of the web app. Caddy gets and renews the certificate from
+# Let's Encrypt automatically; ports 80 and 443 must reach this server.
+# Set up with: bash scripts/setup-domain.sh <your-domain>
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+}

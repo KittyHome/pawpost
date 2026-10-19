@@ -5,7 +5,7 @@
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { createLogger } from "@pawpost/core";
+import { checkPublicUrl, createLogger } from "@pawpost/core";
 import { createDatabase } from "@pawpost/db";
 import { runMigrations } from "@pawpost/db/migrate";
 import { createEngine } from "@pawpost/engine";
@@ -95,6 +95,8 @@ logger.info("worker started", {
   appUrl: env.APP_URL,
   aiProxy: Boolean(env.OPENAI_PROXY_URL ?? env.HTTPS_PROXY),
 });
+const publicUrl = checkPublicUrl(env.APP_URL);
+if (publicUrl.message) logger.warn(publicUrl.message, { problem: publicUrl.problem });
 
 let stopping = false;
 async function shutdown(reason: string) {

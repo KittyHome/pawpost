@@ -1,6 +1,8 @@
+import { checkPublicUrl, type PublicUrlProblem } from "@pawpost/core";
 import { TRASH_RETENTION_DAYS } from "@pawpost/engine";
 import type { Metadata } from "next";
 
+import { LearnMore } from "@/components/help-link";
 import { ToneBadge } from "@/components/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatNumber, formatRelative } from "@/lib/format";
@@ -9,7 +11,15 @@ import { env } from "@/server/env";
 
 export const metadata: Metadata = { title: "Settings" };
 
+const PUBLIC_URL_LABELS: Record<PublicUrlProblem, string> = {
+  invalid: "Invalid",
+  localhost: "Local only",
+  ip_address: "IP address",
+  not_https: "No HTTPS",
+};
+
 export default async function GeneralSettingsPage() {
+  const publicUrl = checkPublicUrl(env().APP_URL);
   const e = engine();
   const [worker, users, ai] = await Promise.all([e.system.workerStatus(), e.accounts.listUsers(), e.ai.status()]);
   const owner = users.find((u) => u.role === "owner");
@@ -24,7 +34,23 @@ export default async function GeneralSettingsPage() {
       </CardHeader>
       <CardContent className="grid gap-3 text-sm sm:grid-cols-[12rem_1fr]">
         <span className="text-muted-foreground">Public URL</span>
-        <span className="font-mono break-all">{env().APP_URL}</span>
+        <span className="flex flex-col gap-1.5">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="font-mono break-all">{env().APP_URL}</span>
+            {publicUrl.problem ? (
+              <ToneBadge tone={publicUrl.problem === "localhost" ? "info" : "warning"}>
+                {PUBLIC_URL_LABELS[publicUrl.problem]}
+              </ToneBadge>
+            ) : (
+              <ToneBadge tone="success">HTTPS</ToneBadge>
+            )}
+          </span>
+          {publicUrl.message && (
+            <span className="text-muted-foreground">
+              {publicUrl.message} <LearnMore href="/help/self-hosting#your-domain-and-https">Set up a domain</LearnMore>
+            </span>
+          )}
+        </span>
         <span className="text-muted-foreground">Owner</span>
         <span>{owner ? `${owner.name} (${owner.email})` : "–"}</span>
         <span className="text-muted-foreground">Team</span>
