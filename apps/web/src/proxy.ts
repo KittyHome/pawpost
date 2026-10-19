@@ -17,8 +17,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Public: sign-in and account flows, recipient-facing unsubscribe pages, health check, static assets.
+  // Public: sign-in and account flows, recipient-facing unsubscribe pages, health check, static assets,
+  // and the icon and preview image that link unfurlers fetch without signing in.
   matcher: [
-    "/((?!login|setup|invite/|forgot-password|reset-password/|u/|api/unsubscribe|api/health|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|ico)$).*)",
+    "/((?!login|setup|invite/|forgot-password|reset-password/|u/|api/unsubscribe|api/health|_next/static|_next/image|favicon.ico|opengraph-image|apple-icon|.*\\.(?:svg|png|ico)$).*)",
   ],
 };

@@ -8,7 +8,6 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   LogOutIcon,
-  MailIcon,
   SendIcon,
   SettingsIcon,
   Trash2Icon,
@@ -18,6 +17,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { LogoMark } from "@/components/logo-mark";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -105,9 +105,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <MailIcon className="size-4" />
-                </div>
+                <LogoMark className="size-8!" />
                 <div className="grid flex-1 text-left leading-tight">
                   <span className="truncate font-semibold">Pawpost</span>
                   <span className="truncate text-xs text-muted-foreground">Cold outreach</span>

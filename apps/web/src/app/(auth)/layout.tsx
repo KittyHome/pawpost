@@ -1,6 +1,6 @@
-import { MailIcon } from "lucide-react";
 import Link from "next/link";
 
+import { LogoMark } from "@/components/logo-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 // Sign-in and account flows read the database on every request.
@@ -12,9 +12,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <ThemeToggle className="absolute top-4 right-4" />
       <div className="flex w-full max-w-sm flex-col gap-6">
         <Link href="/" className="flex items-center justify-center gap-2 font-semibold">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <MailIcon className="size-4" />
-          </span>
+          <LogoMark />
           Pawpost
         </Link>
         {children}
