@@ -430,6 +430,21 @@ export function createListService(ctx: EngineContext) {
       return { filename: `${slugify(list.name)}-contacts.csv`, csv };
     },
 
+    /** Creates an empty list. Contacts are added later by hand or by CSV import. */
+    async create(actor: Actor, raw: unknown): Promise<ContactList> {
+      const { name } = listInput.parse(raw);
+      return db.transaction(async (tx) => {
+        const [list] = await tx.insert(contactLists).values({ name }).returning();
+        await writeAudit(tx, actor, {
+          action: "list.created",
+          summary: `${actor.email} created empty list "${name}"`,
+          entityType: "list",
+          entityId: list!.id,
+        });
+        return list!;
+      });
+    },
+
     /**
      * Imports a CSV into an existing list. Rows are rejected (never silently dropped)
      * when the address is malformed, duplicated, a role inbox, on the suppression list,

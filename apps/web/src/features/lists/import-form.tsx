@@ -3,6 +3,7 @@
 import type { ImportReport } from "@pawpost/engine";
 import { CircleCheckIcon } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { FormAlert } from "@/components/form-alert";
 import { LearnMore } from "@/components/help-link";
@@ -27,15 +28,18 @@ const REASON_LABELS: Record<string, string> = {
   no_mail_domain: "Domain can't receive mail",
 };
 
+/** Without `listId`, creates a list (the CSV is optional); with it, imports into that list. */
 export function ImportForm({ listId }: { listId?: string }) {
   const { state, pending, formProps } = useActionForm<ActionState<ImportReport>>(importContacts.bind(null, listId ?? null), idle);
   const report = state.status === "success" ? state.data : undefined;
+  const [hasFile, setHasFile] = useState(false);
+  const creating = !listId;
 
   return (
     <div className="flex flex-col gap-6">
       <form {...formProps} className="flex flex-col gap-6">
         <FieldGroup>
-          {!listId && (
+          {creating && (
             <Field data-invalid={Boolean(fieldError(state, "name"))}>
               <FieldLabel htmlFor="name">List name</FieldLabel>
               <Input id="name" name="name" required placeholder="Developers – October" />
@@ -43,33 +47,47 @@ export function ImportForm({ listId }: { listId?: string }) {
             </Field>
           )}
           <Field>
-            <FieldLabel htmlFor="file">CSV file</FieldLabel>
-            <Input id="file" name="file" type="file" accept=".csv,text/csv" required />
+            <FieldLabel htmlFor="file">
+              CSV file{creating && <span className="font-normal text-muted-foreground">(optional)</span>}
+            </FieldLabel>
+            <Input
+              id="file"
+              name="file"
+              type="file"
+              accept=".csv,text/csv"
+              required={!creating}
+              onChange={(e) => setHasFile(Boolean(e.currentTarget.files?.length))}
+            />
             <FieldDescription>
+              {creating && !hasFile && "Leave empty to start with an empty list and add contacts one by one. "}
               Needs an <code>email</code> column. <code>name</code> or <code>first_name</code>/<code>last_name</code> and{" "}
               <code>company</code> are recognised; other columns become template fields like <code>{"{{city}}"}</code>.{" "}
               <LearnMore href="/help/contact-lists#preparing-your-csv-file">CSV format</LearnMore>
             </FieldDescription>
           </Field>
-          <Field orientation="horizontal">
-            <Checkbox id="checkDomains" name="checkDomains" defaultChecked />
-            <FieldContent>
-              <FieldLabel htmlFor="checkDomains">Check that each domain can receive mail</FieldLabel>
-              <FieldDescription>DNS lookup per domain. Catches typos and dead domains that would bounce.</FieldDescription>
-            </FieldContent>
-          </Field>
-          <Field orientation="horizontal">
-            <Checkbox id="skipRoleAddresses" name="skipRoleAddresses" defaultChecked />
-            <FieldContent>
-              <FieldLabel htmlFor="skipRoleAddresses">Skip role addresses</FieldLabel>
-              <FieldDescription>Shared inboxes like info@ or support@ rarely reply and often report spam.</FieldDescription>
-            </FieldContent>
-          </Field>
+          {(!creating || hasFile) && (
+            <>
+              <Field orientation="horizontal">
+                <Checkbox id="checkDomains" name="checkDomains" defaultChecked />
+                <FieldContent>
+                  <FieldLabel htmlFor="checkDomains">Check that each domain can receive mail</FieldLabel>
+                  <FieldDescription>DNS lookup per domain. Catches typos and dead domains that would bounce.</FieldDescription>
+                </FieldContent>
+              </Field>
+              <Field orientation="horizontal">
+                <Checkbox id="skipRoleAddresses" name="skipRoleAddresses" defaultChecked />
+                <FieldContent>
+                  <FieldLabel htmlFor="skipRoleAddresses">Skip role addresses</FieldLabel>
+                  <FieldDescription>Shared inboxes like info@ or support@ rarely reply and often report spam.</FieldDescription>
+                </FieldContent>
+              </Field>
+            </>
+          )}
         </FieldGroup>
         <FormAlert state={state} />
         <div className="flex justify-end">
-          <SubmitButton pending={pending} pendingText="Importing…">
-            {listId ? "Import into this list" : "Create list"}
+          <SubmitButton pending={pending} pendingText={creating && !hasFile ? "Creating…" : "Importing…"}>
+            {!creating ? "Import into this list" : hasFile ? "Create list and import" : "Create empty list"}
           </SubmitButton>
         </div>
       </form>

@@ -3,10 +3,10 @@ title: Contact lists and CSV import
 description: Prepare a CSV file, import it, and understand why some rows are skipped.
 category: setup
 order: 3
-keywords: csv, import, contacts, list, spreadsheet, excel, columns, upload, duplicates, role address, invalid, custom fields, attributes
+keywords: csv, import, contacts, list, spreadsheet, excel, columns, upload, duplicates, role address, invalid, custom fields, attributes, empty list, add contact, manual
 ---
 
-A **contact list** is a group of people to email, imported from a CSV file. A campaign sends to one list.
+A **contact list** is a group of people to email. Import them from a CSV file, add them one by one, or both. A campaign sends to one list.
 
 ## Preparing your CSV file
 
@@ -40,16 +40,23 @@ If you have both a full-name column and first/last name columns, the first/last 
 
 Pawpost tidies names: "ANN SMITH" becomes "Ann Smith". Values that look like usernames rather than names (such as "bob77" or "jsmith") are left blank, so your email says "Hi there" instead of "Hi bob77".
 
-## Importing
+## Creating a list
 
 1. Go to **Contact lists**.
-2. Enter a **list name** and choose the **CSV file** (up to 10 MB, 100,000 rows).
-3. Choose the checks (both are recommended):
+2. Enter a **list name**.
+3. To import people now, choose a **CSV file** (up to 10 MB, 100,000 rows) and pick the checks (both are recommended):
    - **Check that each domain can receive mail**: looks up each email domain and skips those that can't receive email, such as misspelled domains that don't exist or companies that have closed.
    - **Skip role addresses**: skips shared inboxes like `info@`, `sales@`, `support@`, which rarely reply and often report spam.
-4. Click **Create list**.
+4. Click **Create list and import**. Without a file, the button says **Create empty list** and opens the new list.
 
-To add more contacts later, open the list and click **Import more**. People already in the list are skipped.
+## Adding people to a list
+
+Open the list, then:
+
+- **Add contact** adds one person: their email, name, company and any custom fields.
+- **Import CSV** adds everyone in a file. People already in the list are skipped.
+
+Addresses on the suppression list can't be added either way.
 
 ## Why rows are skipped
 
@@ -73,4 +80,4 @@ Open a list to see its contacts. Search by name or email. The status column show
 
 ## Deleting a list
 
-Open the list and click **Delete**. A list that a campaign uses can't be deleted; delete the campaign first.
+Open the list, click **⋯** and choose **Move to trash**. You can restore it from the trash for 30 days. A list that a campaign uses can't be deleted; delete the campaign first.

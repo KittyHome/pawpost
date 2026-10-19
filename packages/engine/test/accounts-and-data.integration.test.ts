@@ -225,6 +225,17 @@ describe("accounts and data management", () => {
       expect((await engine.lists.contacts(listId)).rows.map((c) => c.email)).toEqual(["bo@c.test", "zoe@a.test"]);
     });
 
+    it("creates an empty list and fills it by hand or by CSV", async () => {
+      await expect(engine.lists.create(member, { name: "  " })).rejects.toThrow(/List name is required/);
+      const empty = await engine.lists.create(member, { name: "Warm intros" });
+      expect(await engine.lists.get(empty.id)).toMatchObject({ name: "Warm intros", contactCount: 0, attributeColumns: [] });
+
+      await engine.lists.addContact(member, empty.id, { email: "kim@e.test", firstName: "Kim" });
+      await engine.lists.importCsv(member, empty.id, "email,City\nlee@f.test,Oslo", { checkDomains: false });
+      const filled = await engine.lists.get(empty.id);
+      expect(filled).toMatchObject({ contactCount: 2, attributeColumns: ["City"] });
+    });
+
     it("lets a trashed address be re-imported, and refuses a conflicting restore", async () => {
       await engine.lists.importCsv(member, listId, "email,first_name\namy@b.test,Amy Again", { checkDomains: false });
       const trashed = (await engine.trash.list()).contacts.find((c) => c.email === "amy@b.test")!;

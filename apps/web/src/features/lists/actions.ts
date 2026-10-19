@@ -8,9 +8,13 @@ import type { ActionState } from "@/lib/action-state";
 import { formToObject, runAction } from "@/server/action";
 import { engine } from "@/server/engine";
 
-async function readCsv(form: FormData): Promise<string> {
+function csvFile(form: FormData): File | null {
   const file = form.get("file");
-  if (!(file instanceof File) || file.size === 0) throw new DomainError("validation", "Choose a CSV file to upload.");
+  return file instanceof File && file.size > 0 ? file : null;
+}
+
+async function readCsv(file: File | null): Promise<string> {
+  if (!file) throw new DomainError("validation", "Choose a CSV file to upload.");
   if (file.size > 10 * 1024 * 1024) throw new DomainError("validation", "CSV files are limited to 10 MB.");
   return file.text();
 }
@@ -25,14 +29,23 @@ const refreshList = (listId: string) => {
   revalidatePath(`/lists/${listId}`);
 };
 
-/** Creates a list from an uploaded CSV. `listId` is set to import into an existing list instead. */
+/**
+ * Creates a list, from an uploaded CSV or empty when no file is chosen (then opens it).
+ * `listId` is set to import into an existing list instead.
+ */
 export async function importContacts(
   listId: string | null,
   _prev: ActionState<ImportReport>,
   form: FormData,
 ): Promise<ActionState<ImportReport>> {
   return runAction(async ({ actor }) => {
-    const csv = await readCsv(form);
+    const file = csvFile(form);
+    if (!listId && !file) {
+      const list = await engine().lists.create(actor, { name: form.get("name") });
+      revalidatePath("/lists");
+      redirect(`/lists/${list.id}`);
+    }
+    const csv = await readCsv(file);
     const report = listId
       ? await engine().lists.importCsv(actor, listId, csv, importOptions(form))
       : await engine().lists.createFromCsv(actor, form.get("name"), csv, importOptions(form));

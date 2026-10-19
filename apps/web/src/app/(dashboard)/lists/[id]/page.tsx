@@ -109,6 +109,9 @@ export default async function ListPage({ params, searchParams }: PageProps<"/lis
             attributeColumns={list.attributeColumns}
             sort={contacts.sort}
             dir={contacts.dir}
+            emptyText={
+              list.contactCount === 0 ? "No contacts yet. Use Add contact for one person, or Import CSV for many." : undefined
+            }
           />
           <Pagination page={contacts.page} pageSize={contacts.pageSize} total={contacts.total} hrefFor={href} />
         </CardContent>

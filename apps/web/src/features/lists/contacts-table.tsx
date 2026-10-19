@@ -49,6 +49,7 @@ export function ContactsTable({
   attributeColumns,
   sort,
   dir,
+  emptyText = "No contacts match.",
 }: {
   listId: string;
   rows: ContactRow[];
@@ -56,6 +57,7 @@ export function ContactsTable({
   attributeColumns: string[];
   sort: SortKey;
   dir: "asc" | "desc";
+  emptyText?: string;
 }) {
   const pathname = usePathname();
   const params = useSearchParams();
@@ -196,7 +198,7 @@ export function ContactsTable({
           {rows.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                No contacts match.
+                {emptyText}
               </TableCell>
             </TableRow>
           )}

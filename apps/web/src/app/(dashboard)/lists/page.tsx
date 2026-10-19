@@ -21,7 +21,7 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
       <PageHeader
         title="Contact lists"
         help={{ href: "/help/contact-lists", label: "Contact lists and CSV import" }}
-        description="Imported recipients. Suppressed and undeliverable addresses are filtered out on import."
+        description="People to email. Suppressed and undeliverable addresses are filtered out when contacts are added."
       />
 
       {trashed && (
@@ -41,7 +41,7 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
         <Card className="lg:col-span-3 py-0">
           {lists.length === 0 ? (
             <CardContent className="py-10 text-center text-sm text-muted-foreground">
-              No lists yet. Import your first CSV.
+              No lists yet. Create your first one.
             </CardContent>
           ) : (
             <Table>
@@ -71,8 +71,10 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Import a new list</CardTitle>
-            <CardDescription>Only import people you have a legitimate reason to contact.</CardDescription>
+            <CardTitle>New list</CardTitle>
+            <CardDescription>
+              Import a CSV or start empty. Only add people you have a legitimate reason to contact.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ImportForm />
