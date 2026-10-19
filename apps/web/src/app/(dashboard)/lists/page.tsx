@@ -130,12 +130,7 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
                     </time>
                   </TableCell>
                   <TableCell className="pr-3 text-right">
-                    <ListRowActions
-                      listId={list.id}
-                      name={list.name}
-                      canExport={canExport}
-                      inUse={list.campaigns.length > 0}
-                    />
+                    <ListRowActions listId={list.id} name={list.name} canExport={canExport} inUse={list.campaigns.length > 0} />
                   </TableCell>
                 </TableRow>
               ))}
