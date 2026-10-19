@@ -1,5 +1,7 @@
 # Pawpost
 
+![Pawpost](docs/banner.png)
+
 Self-hosted, source-available cold email outreach. You bring your own mailboxes and contact lists; Pawpost sends short plain-text sequences from them at a human pace, reads replies and bounces from the same inboxes, and stops when it should.
 
 - **Your mailboxes, rotated.** Connect Google Workspace, Microsoft 365 or any SMTP/IMAP account. Each has a daily cap and a minimum gap between sends, with random jitter.
