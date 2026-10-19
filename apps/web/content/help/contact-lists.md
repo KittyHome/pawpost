@@ -42,7 +42,7 @@ Pawpost tidies names: "ANN SMITH" becomes "Ann Smith". Values that look like use
 
 ## Creating a list
 
-1. Go to **Contact lists**.
+1. Go to **Contact lists** and click **New list**.
 2. Enter a **list name**.
 3. To import people now, choose a **CSV file** (up to 10 MB, 100,000 rows) and pick the checks (both are recommended):
    - **Check that each domain can receive mail**: looks up each email domain and skips those that can't receive email, such as misspelled domains that don't exist or companies that have closed.
@@ -76,8 +76,8 @@ The import summary shows how many rows were skipped and why. Expand **Show skipp
 
 ## Viewing and searching a list
 
-Open a list to see its contacts. Search by name or email. The status column shows **Suppressed** for anyone on the suppression list. They stay in the list for your records but are never emailed.
+The **Contact lists** page shows each list's size, custom fields, and the campaigns that send to it. Open a list to see its contacts. Search by name or email. The status column shows **Suppressed** for anyone on the suppression list. They stay in the list for your records but are never emailed.
 
 ## Deleting a list
 
-Open the list, click **⋯** and choose **Move to trash**. You can restore it from the trash for 30 days. A list that a campaign uses can't be deleted; delete the campaign first.
+Click **⋯** next to the list (or inside it) and choose **Move to trash**. You can restore it from the trash for 30 days. A list that a campaign uses can't be deleted; delete the campaign first.

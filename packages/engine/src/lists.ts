@@ -51,6 +51,11 @@ export interface ListSummary extends ContactList {
   contactCount: number;
 }
 
+export interface ListOverview extends ListSummary {
+  /** Campaigns (not in the trash) that send to this list. */
+  campaigns: { id: string; name: string }[];
+}
+
 export interface ContactQuery {
   page?: number;
   pageSize?: number;
@@ -103,15 +108,26 @@ export function createListService(ctx: EngineContext) {
   }
 
   return {
-    async list(): Promise<ListSummary[]> {
-      const rows = await db
-        .select({ list: contactLists, contactCount: count(contacts.id) })
-        .from(contactLists)
-        .leftJoin(contacts, and(eq(contacts.listId, contactLists.id), isNull(contacts.deletedAt)))
-        .where(isNull(contactLists.deletedAt))
-        .groupBy(contactLists.id)
-        .orderBy(desc(contactLists.createdAt));
-      return rows.map((r) => ({ ...r.list, contactCount: r.contactCount }));
+    async list(): Promise<ListOverview[]> {
+      const [rows, usedBy] = await Promise.all([
+        db
+          .select({ list: contactLists, contactCount: count(contacts.id) })
+          .from(contactLists)
+          .leftJoin(contacts, and(eq(contacts.listId, contactLists.id), isNull(contacts.deletedAt)))
+          .where(isNull(contactLists.deletedAt))
+          .groupBy(contactLists.id)
+          .orderBy(desc(contactLists.createdAt)),
+        db
+          .select({ id: campaigns.id, name: campaigns.name, listId: campaigns.listId })
+          .from(campaigns)
+          .where(isNull(campaigns.deletedAt))
+          .orderBy(asc(campaigns.name)),
+      ]);
+      return rows.map((r) => ({
+        ...r.list,
+        contactCount: r.contactCount,
+        campaigns: usedBy.filter((c) => c.listId === r.list.id).map(({ id, name }) => ({ id, name })),
+      }));
     },
 
     async get(id: string): Promise<ListSummary> {

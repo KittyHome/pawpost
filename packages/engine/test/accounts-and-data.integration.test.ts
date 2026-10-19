@@ -246,6 +246,7 @@ describe("accounts and data management", () => {
   describe("trash", () => {
     it("protects lists in use and restores campaigns only with their list", async () => {
       const campaign = await engine.campaigns.create(member, { name: "Spring", listId });
+      expect((await engine.lists.list()).find((l) => l.id === listId)?.campaigns).toEqual([{ id: campaign.id, name: "Spring" }]);
       await expect(engine.lists.trash(member, listId)).rejects.toThrow(/used by a campaign/);
 
       await engine.campaigns.trash(member, campaign.id);

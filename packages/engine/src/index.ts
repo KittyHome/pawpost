@@ -60,7 +60,7 @@ export type { CampaignDetail, Preflight } from "./campaigns";
 export type { Actor, EngineOptions } from "./context";
 export type { DispatchSummary } from "./dispatch";
 export type { InboxSyncSummary } from "./inbox-sync";
-export type { BulkResult, ContactQuery, ImportReport, ListSummary } from "./lists";
+export type { BulkResult, ContactQuery, ImportReport, ListOverview, ListSummary } from "./lists";
 export type { ConnectionTestResult, MailboxSummary } from "./mailboxes";
 export type { ErasePreview } from "./privacy";
 export type { CampaignStats } from "./stats";
