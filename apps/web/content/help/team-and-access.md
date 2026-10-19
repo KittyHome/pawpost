@@ -66,6 +66,8 @@ Open **Account** from the menu under your name (bottom of the sidebar) to:
 
 Sessions last 30 days of inactivity. Using Pawpost keeps you signed in.
 
+To switch between **light** and **dark** mode, use the sun/moon button at the top right of any page. **System** follows your computer's setting. The choice is saved in your browser, so each device keeps its own.
+
 ## Passwords and security
 
 - Passwords need at least 10 characters. A few unrelated words make a strong, memorable password.

@@ -20,15 +20,31 @@ import { cn } from "@/lib/utils";
  * ------------------------------------------------------------------------- */
 
 const CALLOUTS: Record<string, { title: string; icon: LucideIcon; className: string }> = {
-  note: { title: "Note", icon: InfoIcon, className: "border-sky-500/30 bg-sky-500/5 [&_svg]:text-sky-600" },
-  tip: { title: "Tip", icon: LightbulbIcon, className: "border-emerald-500/30 bg-emerald-500/5 [&_svg]:text-emerald-600" },
+  note: {
+    title: "Note",
+    icon: InfoIcon,
+    className: "border-sky-500/30 bg-sky-500/5 [&_svg]:text-sky-600 dark:[&_svg]:text-sky-400",
+  },
+  tip: {
+    title: "Tip",
+    icon: LightbulbIcon,
+    className: "border-emerald-500/30 bg-emerald-500/5 [&_svg]:text-emerald-600 dark:[&_svg]:text-emerald-400",
+  },
   important: {
     title: "Important",
     icon: SparklesIcon,
-    className: "border-violet-500/30 bg-violet-500/5 [&_svg]:text-violet-600",
+    className: "border-violet-500/30 bg-violet-500/5 [&_svg]:text-violet-600 dark:[&_svg]:text-violet-400",
   },
-  warning: { title: "Warning", icon: TriangleAlertIcon, className: "border-amber-500/40 bg-amber-500/5 [&_svg]:text-amber-600" },
-  caution: { title: "Caution", icon: OctagonAlertIcon, className: "border-red-500/30 bg-red-500/5 [&_svg]:text-red-600" },
+  warning: {
+    title: "Warning",
+    icon: TriangleAlertIcon,
+    className: "border-amber-500/40 bg-amber-500/5 [&_svg]:text-amber-600 dark:[&_svg]:text-amber-400",
+  },
+  caution: {
+    title: "Caution",
+    icon: OctagonAlertIcon,
+    className: "border-red-500/30 bg-red-500/5 [&_svg]:text-red-600 dark:[&_svg]:text-red-400",
+  },
 };
 
 function remarkCallouts() {

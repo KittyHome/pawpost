@@ -110,7 +110,7 @@ export default async function OverviewPage() {
                   {setup.map((step) => (
                     <li key={step.label} className="flex items-center gap-2 text-sm">
                       {step.done ? (
-                        <CircleCheckIcon className="size-4 text-emerald-600" aria-hidden />
+                        <CircleCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden />
                       ) : (
                         <CircleIcon className="size-4 text-muted-foreground" aria-hidden />
                       )}

@@ -119,7 +119,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
               ))}
               {preflight.warnings.map((msg) => (
                 <li key={msg} className="flex items-start gap-2 text-muted-foreground">
-                  <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-600" aria-hidden />
+                  <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
                   {msg}
                 </li>
               ))}

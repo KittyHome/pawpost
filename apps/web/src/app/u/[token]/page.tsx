@@ -37,7 +37,7 @@ export default async function UnsubscribePage({ params, searchParams }: PageProp
         ) : done || info.alreadyUnsubscribed ? (
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CircleCheckIcon className="size-5 text-emerald-600" aria-hidden /> You&apos;re unsubscribed
+              <CircleCheckIcon className="size-5 text-emerald-600 dark:text-emerald-400" aria-hidden /> You&apos;re unsubscribed
             </CardTitle>
             <CardDescription>{info.maskedEmail} won&apos;t receive any more emails from this sender.</CardDescription>
           </CardHeader>

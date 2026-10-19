@@ -28,14 +28,14 @@ export interface ActivityItem {
 
 const META: Record<string, { icon: LucideIcon; label: string; className: string }> = {
   sent: { icon: SendIcon, label: "Sent", className: "text-muted-foreground" },
-  reply: { icon: MessageSquareReplyIcon, label: "Reply", className: "text-emerald-600" },
+  reply: { icon: MessageSquareReplyIcon, label: "Reply", className: "text-emerald-600 dark:text-emerald-400" },
   auto_reply: { icon: PlaneIcon, label: "Auto-reply", className: "text-muted-foreground" },
-  bounce: { icon: MailWarningIcon, label: "Bounce", className: "text-red-600" },
-  unsubscribe: { icon: BanIcon, label: "Unsubscribed", className: "text-amber-600" },
-  send_failed: { icon: CircleAlertIcon, label: "Send failed", className: "text-red-600" },
-  campaign_paused: { icon: PauseIcon, label: "Campaign paused", className: "text-amber-600" },
-  campaign_completed: { icon: CircleCheckIcon, label: "Campaign completed", className: "text-sky-600" },
-  mailbox_error: { icon: CircleAlertIcon, label: "Mailbox error", className: "text-red-600" },
+  bounce: { icon: MailWarningIcon, label: "Bounce", className: "text-red-600 dark:text-red-400" },
+  unsubscribe: { icon: BanIcon, label: "Unsubscribed", className: "text-amber-600 dark:text-amber-400" },
+  send_failed: { icon: CircleAlertIcon, label: "Send failed", className: "text-red-600 dark:text-red-400" },
+  campaign_paused: { icon: PauseIcon, label: "Campaign paused", className: "text-amber-600 dark:text-amber-400" },
+  campaign_completed: { icon: CircleCheckIcon, label: "Campaign completed", className: "text-sky-600 dark:text-sky-400" },
+  mailbox_error: { icon: CircleAlertIcon, label: "Mailbox error", className: "text-red-600 dark:text-red-400" },
 };
 
 const INTENT_LABEL: Record<string, string> = {
