@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { formatNumber } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 /** Server-rendered pager driven by the ?page= search param. */
 export function Pagination({
@@ -10,11 +11,13 @@ export function Pagination({
   pageSize,
   total,
   hrefFor,
+  className,
 }: {
   page: number;
   pageSize: number;
   total: number;
   hrefFor: (page: number) => string;
+  className?: string;
 }) {
   const pages = Math.max(Math.ceil(total / pageSize), 1);
   if (pages <= 1) return null;
@@ -22,7 +25,7 @@ export function Pagination({
   const to = Math.min(page * pageSize, total);
 
   return (
-    <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+    <div className={cn("flex items-center justify-between gap-2 text-sm text-muted-foreground", className)}>
       <span>
         {formatNumber(from)}–{formatNumber(to)} of {formatNumber(total)}
       </span>

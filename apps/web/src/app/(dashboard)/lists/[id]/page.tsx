@@ -113,7 +113,13 @@ export default async function ListPage({ params, searchParams }: PageProps<"/lis
               list.contactCount === 0 ? "No contacts yet. Use Add contact for one person, or Import CSV for many." : undefined
             }
           />
-          <Pagination page={contacts.page} pageSize={contacts.pageSize} total={contacts.total} hrefFor={href} />
+          <Pagination
+            page={contacts.page}
+            pageSize={contacts.pageSize}
+            total={contacts.total}
+            hrefFor={href}
+            className="border-t pt-4"
+          />
         </CardContent>
       </Card>
     </>
