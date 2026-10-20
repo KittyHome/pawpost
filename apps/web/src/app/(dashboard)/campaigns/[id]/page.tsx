@@ -148,7 +148,19 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
             <StatCard
               label="Replies"
               value={formatNumber(s.replies)}
-              hint={`${formatPercent(s.replies, s.enrolled)} of contacts`}
+              hint={
+                <>
+                  {formatPercent(s.replies, s.enrolled)} of contacts
+                  {s.replies > 0 && (
+                    <>
+                      {" · "}
+                      <Link href={`/inbox?campaign=${id}`} className="underline-offset-3 hover:underline">
+                        Open inbox
+                      </Link>
+                    </>
+                  )}
+                </>
+              }
               icon={MessageSquareReplyIcon}
             />
             <StatCard

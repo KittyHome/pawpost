@@ -8,6 +8,7 @@ import {
   InboxIcon,
   LayoutDashboardIcon,
   LogOutIcon,
+  MessageSquareReplyIcon,
   SendIcon,
   SettingsIcon,
   Trash2Icon,
@@ -51,6 +52,7 @@ const NAV = [
     items: [
       { title: "Overview", href: "/overview", icon: LayoutDashboardIcon },
       { title: "Campaigns", href: "/campaigns", icon: SendIcon },
+      { title: "Replies", href: "/inbox", icon: MessageSquareReplyIcon, badge: "inbox" as const },
       { title: "Contact lists", href: "/lists", icon: UsersIcon },
     ],
   },
@@ -65,7 +67,7 @@ const NAV = [
     label: "Workspace",
     items: [
       { title: "Settings", href: "/settings", icon: SettingsIcon },
-      { title: "Trash", href: "/trash", icon: Trash2Icon, badge: true },
+      { title: "Trash", href: "/trash", icon: Trash2Icon, badge: "trash" as const },
       { title: "Help center", href: "/help", icon: BookOpenIcon },
     ],
   },
@@ -81,11 +83,13 @@ export function AppSidebar({
   user,
   worker,
   trashCount,
+  inboxCount,
   logoutAction,
 }: {
   user: SidebarUser;
   worker: { online: boolean; lastSeenAt: string | null };
   trashCount: number;
+  inboxCount: number;
   logoutAction: () => Promise<void>;
 }) {
   const pathname = usePathname();
@@ -130,7 +134,12 @@ export function AppSidebar({
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
-                    {"badge" in item && trashCount > 0 && <SidebarMenuBadge>{trashCount}</SidebarMenuBadge>}
+                    {"badge" in item && item.badge === "trash" && trashCount > 0 && (
+                      <SidebarMenuBadge>{trashCount}</SidebarMenuBadge>
+                    )}
+                    {"badge" in item && item.badge === "inbox" && inboxCount > 0 && (
+                      <SidebarMenuBadge>{inboxCount}</SidebarMenuBadge>
+                    )}
                   </SidebarMenuItem>
                 ))}
               </SidebarMenu>

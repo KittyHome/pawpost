@@ -34,52 +34,52 @@ export default async function GeneralSettingsPage() {
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <dl className="divide-y">
-            <SettingRow label="Public URL">
-              <span className="flex flex-col gap-1.5">
-                <span className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono break-all">{env().APP_URL}</span>
-                  {publicUrl.problem ? (
-                    <ToneBadge tone={publicUrl.problem === "localhost" ? "info" : "warning"}>
-                      {PUBLIC_URL_LABELS[publicUrl.problem]}
-                    </ToneBadge>
-                  ) : (
-                    <ToneBadge tone="success">HTTPS</ToneBadge>
-                  )}
-                </span>
-                {publicUrl.message && (
-                  <span className="text-muted-foreground">
-                    {publicUrl.message} <LearnMore href="/help/self-hosting#your-domain-and-https">Set up a domain</LearnMore>
-                  </span>
+          <SettingRow label="Public URL">
+            <span className="flex flex-col gap-1.5">
+              <span className="flex flex-wrap items-center gap-2">
+                <span className="font-mono break-all">{env().APP_URL}</span>
+                {publicUrl.problem ? (
+                  <ToneBadge tone={publicUrl.problem === "localhost" ? "info" : "warning"}>
+                    {PUBLIC_URL_LABELS[publicUrl.problem]}
+                  </ToneBadge>
+                ) : (
+                  <ToneBadge tone="success">HTTPS</ToneBadge>
                 )}
               </span>
-            </SettingRow>
-            <SettingRow label="Owner">{owner ? `${owner.name} (${owner.email})` : "–"}</SettingRow>
-            <SettingRow label="Team">{formatNumber(users.length)} user(s)</SettingRow>
-            <SettingRow label="Worker">
-              <span className="flex flex-wrap items-center gap-2">
-                {worker.online ? <ToneBadge tone="success">Online</ToneBadge> : <ToneBadge tone="danger">Offline</ToneBadge>}
+              {publicUrl.message && (
                 <span className="text-muted-foreground">
-                  last heartbeat {formatRelative(worker.lastSeenAt)}
-                  {worker.version ? ` · v${worker.version}` : ""}
+                  {publicUrl.message} <LearnMore href="/help/self-hosting#your-domain-and-https">Set up a domain</LearnMore>
                 </span>
+              )}
+            </span>
+          </SettingRow>
+          <SettingRow label="Owner">{owner ? `${owner.name} (${owner.email})` : "–"}</SettingRow>
+          <SettingRow label="Team">{formatNumber(users.length)} user(s)</SettingRow>
+          <SettingRow label="Worker">
+            <span className="flex flex-wrap items-center gap-2">
+              {worker.online ? <ToneBadge tone="success">Online</ToneBadge> : <ToneBadge tone="danger">Offline</ToneBadge>}
+              <span className="text-muted-foreground">
+                last heartbeat {formatRelative(worker.lastSeenAt)}
+                {worker.version ? ` · v${worker.version}` : ""}
               </span>
-            </SettingRow>
-            <SettingRow label="System email">
-              {e.accounts.systemMailConfigured() ? (
-                <ToneBadge tone="success">Configured</ToneBadge>
-              ) : (
-                <span className="text-muted-foreground">
-                  Not configured: invitation and reset links are shown to copy and share.
-                </span>
-              )}
-            </SettingRow>
-            <SettingRow label="AI">
-              {ai.configured ? (
-                <ToneBadge tone="success">OpenAI · {ai.model}</ToneBadge>
-              ) : (
-                <span className="text-muted-foreground">Not configured</span>
-              )}
-            </SettingRow>
+            </span>
+          </SettingRow>
+          <SettingRow label="System email">
+            {e.accounts.systemMailConfigured() ? (
+              <ToneBadge tone="success">Configured</ToneBadge>
+            ) : (
+              <span className="text-muted-foreground">
+                Not configured: invitation and reset links are shown to copy and share.
+              </span>
+            )}
+          </SettingRow>
+          <SettingRow label="AI">
+            {ai.configured ? (
+              <ToneBadge tone="success">OpenAI · {ai.model}</ToneBadge>
+            ) : (
+              <span className="text-muted-foreground">Not configured</span>
+            )}
+          </SettingRow>
           <SettingRow label="Trash retention">{TRASH_RETENTION_DAYS} days, then deleted permanently</SettingRow>
         </dl>
       </CardContent>

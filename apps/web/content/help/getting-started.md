@@ -26,7 +26,8 @@ You need:
 1. Open **Mailboxes** in the sidebar and click **Connect mailbox**.
 2. Choose your provider. Pawpost fills in the server settings for you.
 3. Enter the email address, the name recipients should see (a real person's name works best), and the password. For Gmail and Google Workspace this must be an **App Password**, not your normal password. [How to create one](/help/mailboxes#google-workspace-and-gmail)
-4. Click **Connect mailbox**. Pawpost logs in to check everything works before saving.
+4. Leave the daily limit at **10** for a new mailbox. You can raise it later.
+5. Click **Connect mailbox**. Pawpost logs in to check everything works before saving.
 
 ## Step 2: Import your contacts
 
@@ -57,7 +58,7 @@ On the **Settings** tab:
 
 ## Step 5: Start
 
-At the top of the campaign, a **Before you can start** box lists anything still missing. When it's gone, click **Start** and confirm.
+At the top of the campaign, a **Before you can start** box lists anything still missing (red). Amber items are advice — you can still start. When the red items are gone, click **Start** and confirm.
 
 Pawpost then sends a few emails at a time within your schedule and mailbox limits. You can follow progress on the campaign's **Overview** and **Contacts** tabs.
 
@@ -66,7 +67,7 @@ Pawpost then sends a few emails at a time within your schedule and mailbox limit
 
 ## What happens next
 
-- **Replies** arrive in your normal mailbox, like any email. Pawpost notices them and stops the sequence for that person.
+- **Replies** arrive in your normal mailbox, like any email. Pawpost notices them, stops the sequence for that person, and lists people who need a look under **Replies** in the sidebar.
 - **Bounces** (addresses that don't exist) and **unsubscribes** are added to your [suppression list](/help/replies-and-bounces#the-suppression-list) automatically, so those addresses are never emailed again.
 - If too many emails bounce, the campaign **pauses itself** so your sending reputation isn't damaged.
 

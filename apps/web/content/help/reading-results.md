@@ -3,7 +3,7 @@ title: Reading your results
 description: What the numbers, statuses and activity feed mean, and what good looks like.
 category: results
 order: 2
-keywords: statistics, stats, results, reply rate, bounce rate, overview, dashboard, activity, contact status, enrolled, completed, failed, progress
+keywords: statistics, stats, results, reply rate, bounce rate, overview, dashboard, activity, contact status, enrolled, completed, failed, progress, inbox
 ---
 
 ## The Overview page
@@ -17,7 +17,7 @@ The four cards at the top cover **the last 7 days across all campaigns**:
 | **Bounces**      | Undeliverable emails, and the bounce rate                     |
 | **Unsubscribes** | People who opted out, as a share of emails sent               |
 
-Below are the **recent activity** feed and, until you've completed setup, a **Get started** checklist.
+Below are the **recent activity** feed and, until you've completed setup, a **Get started** checklist. If anyone has written back and their reply still needs a look, a notice links to **Replies**.
 
 ## A campaign's Overview tab
 
@@ -57,6 +57,10 @@ The campaign's **Contacts** tab shows where each person is. Use the filter butto
 
 > [!NOTE]
 > **Failed** contacts are never retried automatically. If a send was interrupted, the email may already have reached them, and a duplicate would look careless. Check the error message; most often the email couldn't be rendered or the connection dropped mid-send.
+
+## The reply inbox
+
+**Replies** in the sidebar lists people who wrote back. [How to work through them](/help/replies-and-bounces#the-reply-inbox)
 
 ## The activity feed
 

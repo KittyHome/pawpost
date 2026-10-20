@@ -29,6 +29,17 @@ const STATUS: Record<string, { label: string; tone: Tone }> = {
   // suppressions
   complained: { label: "Complained", tone: "danger" },
   manual: { label: "Manual", tone: "neutral" },
+  // reply intents
+  interested: { label: "Interested", tone: "success" },
+  question: { label: "Question", tone: "info" },
+  referral: { label: "Referral", tone: "info" },
+  not_now: { label: "Not now", tone: "neutral" },
+  not_interested: { label: "Not interested", tone: "warning" },
+  unsubscribe: { label: "Opt-out", tone: "danger" },
+  out_of_office: { label: "Out of office", tone: "neutral" },
+  wrong_person: { label: "Wrong person", tone: "warning" },
+  other: { label: "Other", tone: "neutral" },
+  done: { label: "Done", tone: "neutral" },
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {

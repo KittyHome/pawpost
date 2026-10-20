@@ -14,7 +14,11 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
   const { user } = await requireSession();
-  const [worker, trashCount] = await Promise.all([engine().system.workerStatus(), engine().trash.count()]);
+  const [worker, trashCount, inbox] = await Promise.all([
+    engine().system.workerStatus(),
+    engine().trash.count(),
+    engine().replies.counts(),
+  ]);
 
   return (
     <SidebarProvider>
@@ -22,14 +26,13 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
         user={{ name: user.name, email: user.email, role: user.role }}
         worker={{ online: worker.online, lastSeenAt: worker.lastSeenAt?.toISOString() ?? null }}
         trashCount={trashCount}
+        inboxCount={inbox.needsAttention}
         logoutAction={logout}
       />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center border-b">
-          <div className="mx-auto flex h-full w-full max-w-6xl items-center px-6">
-            <SidebarTrigger className="-ml-1" />
-            <ThemeToggle className="ml-auto" />
-          </div>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <ThemeToggle className="ml-auto" />
         </header>
         <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-8">{children}</main>
       </SidebarInset>

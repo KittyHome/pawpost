@@ -30,7 +30,7 @@ export const mailboxInput = z.object({
   imapUsername: trimmed(320).optional(),
   /** Blank = same as SMTP password. */
   imapPassword: optionalSecret,
-  dailyLimit: z.coerce.number().int().min(1, "At least 1 email per day.").max(500, "500 per day is the maximum.").default(30),
+  dailyLimit: z.coerce.number().int().min(1, "At least 1 email per day.").max(500, "500 per day is the maximum.").default(10),
   minIntervalSeconds: z.coerce.number().int().min(30, "Wait at least 30 seconds between sends.").max(3600).default(180),
 });
 export type MailboxInput = z.infer<typeof mailboxInput>;

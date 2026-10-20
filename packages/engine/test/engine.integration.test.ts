@@ -121,6 +121,9 @@ describe("engine end to end", () => {
       },
       { subject: "", body: "Hi {{firstName|there}}, following up once.", waitDays: 4 },
     ]);
+    const ready = await engine.campaigns.preflight(campaignId);
+    expect(ready.errors).toEqual([]);
+    expect(ready.warnings.join("\n")).toMatch(/50\/day/);
     expect(await engine.campaigns.start(owner, campaignId)).toEqual({ enrolled: 4 });
 
     const [a, b] = await Promise.all([engine.dispatch(), engine.dispatch()]);
@@ -197,6 +200,17 @@ describe("engine end to end", () => {
       intent: "interested",
       summary: "Wants a call next week.",
     });
+
+    const replyInbox = await engine.replies.list({ tab: "needs_attention" });
+    expect(replyInbox.total).toBe(1);
+    expect(replyInbox.rows[0]).toMatchObject({
+      email: "ann@acme.test",
+      intent: "interested",
+      summary: "Wants a call next week.",
+    });
+    expect(await engine.replies.counts()).toEqual({ all: 1, needsAttention: 1, done: 0 });
+    await engine.replies.markHandled(owner, replyInbox.rows[0]!.id);
+    expect(await engine.replies.counts()).toEqual({ all: 1, needsAttention: 0, done: 1 });
 
     const suppressed = await engine.suppressions.list();
     expect(suppressed.rows.map((s) => [s.email, s.reason]).sort()).toEqual([

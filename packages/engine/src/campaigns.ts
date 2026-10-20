@@ -95,7 +95,12 @@ export function createCampaignService(ctx: EngineContext) {
       db.select().from(campaignSteps).where(eq(campaignSteps.campaignId, id)).orderBy(asc(campaignSteps.position)),
       db.query.contactLists.findFirst({ where: and(eq(contactLists.id, campaign.listId), isNull(contactLists.deletedAt)) }),
       db
-        .select({ status: mailboxes.status, email: mailboxes.email })
+        .select({
+          status: mailboxes.status,
+          email: mailboxes.email,
+          dailyLimit: mailboxes.dailyLimit,
+          createdAt: mailboxes.createdAt,
+        })
         .from(campaignMailboxes)
         .innerJoin(mailboxes, eq(mailboxes.id, campaignMailboxes.mailboxId))
         .where(eq(campaignMailboxes.campaignId, id)),
@@ -138,6 +143,18 @@ export function createCampaignService(ctx: EngineContext) {
     else if (!attached.some((m) => m.status === "active")) errors.push("None of the attached mailboxes is active.");
     for (const m of attached.filter((m) => m.status === "error"))
       warnings.push(`${m.email} has a connection error and won't send.`);
+    for (const m of attached.filter((m) => m.status === "active")) {
+      const ageDays = (ctx.now().getTime() - m.createdAt.getTime()) / 86_400_000;
+      if (m.dailyLimit > 50) {
+        warnings.push(
+          `${m.email} is set to ${m.dailyLimit}/day. Past about 50, adding another mailbox is safer than pushing this one.`,
+        );
+      } else if (m.dailyLimit > 20 && ageDays < 14) {
+        warnings.push(
+          `${m.email} is less than two weeks old and set to ${m.dailyLimit}/day. New mailboxes usually stay at 10–20.`,
+        );
+      }
+    }
 
     if (list && !contactCount?.n) errors.push("The contact list is empty.");
 

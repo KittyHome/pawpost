@@ -56,7 +56,7 @@ While a campaign is a draft or paused, a **Before you can start** box lists anyt
 - **No active mailbox attached.**
 - **Missing fallback** (amber): some contacts have no first name; add a fallback like `{{firstName|there}}`.
 
-The **Start** button is enabled once all red items are fixed.
+The **Start** button stays enabled for amber items. Only red items block starting — missing sequence, no mailbox, empty list, or no postal address. High daily limits and new mailboxes are warnings, not blockers.
 
 ## Starting
 

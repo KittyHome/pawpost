@@ -13,6 +13,10 @@ export function formatPercent(part: number, whole: number): string {
   return `${((part / whole) * 100).toFixed(1)}%`;
 }
 
+export function daysSince(value: Date | string, now = Date.now()): number {
+  return (now - new Date(value).getTime()) / 86_400_000;
+}
+
 export function formatDateTime(value: Date | string | null | undefined): string {
   if (!value) return "–";
   return dateTimeFormat.format(new Date(value));

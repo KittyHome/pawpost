@@ -3,7 +3,7 @@ title: Replies, bounces and unsubscribes
 description: What Pawpost does when people reply, emails bounce, or someone asks to stop, and how the suppression list works.
 category: results
 order: 1
-keywords: reply, replies, bounce, bounces, unsubscribe, opt-out, suppression list, out of office, auto-reply, do not contact, one-click
+keywords: reply, replies, bounce, bounces, unsubscribe, opt-out, suppression list, out of office, auto-reply, do not contact, one-click, inbox
 ---
 
 ## Replies
@@ -11,13 +11,30 @@ keywords: reply, replies, bounce, bounces, unsubscribe, opt-out, suppression lis
 Replies arrive in the sending mailbox like any other email. Read and answer them there, in Gmail, Outlook or your usual email app. Pawpost reads the same inbox every couple of minutes and:
 
 - marks the contact **Replied**, which stops their sequence (when the campaign's "Stop the sequence when someone replies" setting is on),
-- adds the reply to the campaign's activity feed, with an AI label and summary if [reply classification](/help/ai-features#reply-classification) is on,
+- adds the reply to **Replies** in the sidebar and to the campaign's activity feed, with an AI label and summary if [reply classification](/help/ai-features#reply-classification) is on,
 - if the reply asks to stop ("please remove me", "unsubscribe"), also adds the address to the **suppression list**.
 
 **Out-of-office replies** are recognised and ignored. The contact keeps receiving the sequence.
 
 > [!NOTE]
 > Pawpost only looks at email that arrives _after_ a mailbox is connected, and never deletes, moves or marks your mail as read.
+
+## The reply inbox
+
+**Replies** in the sidebar is a to-do list of people who wrote back, not a second mailbox. Answer from your usual mail app (the **Reply** button opens it). Then **Mark done** so the list stays useful.
+
+The default **Needs a look** filter shows:
+
+- **Interested** — they want to talk, try it or learn more
+- **Question** — they asked something before deciding
+- **Referral** — they pointed you to someone else
+- Replies with no label yet (classification off or still running)
+
+Everything else — not now, not interested, opt-outs, wrong person — stays under **All**. Opt-outs are already on the suppression list.
+
+**Don't email again** puts the address on the suppression list and marks the reply done. Use it when someone declined and you don't want them in a later campaign. You can still reply from your mail app.
+
+A badge on **Replies** is the number that still need a look. Nothing here blocks sending.
 
 ## Bounces
 

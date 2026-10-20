@@ -64,7 +64,7 @@ With **Classify replies** on, each human reply is labelled:
 | Out of office  | Automatic away reply; the sequence continues                                |
 | Wrong person   | Says they're not the right contact                                          |
 
-Labels and a one-line summary appear in the activity feed. Every reply except an out-of-office stops the contact's sequence (when the campaign is set to stop on reply), whatever its label.
+Labels and a one-line summary appear in **Replies** and the activity feed. Interested people, questions and referrals are the default inbox filter. Every reply except an out-of-office stops the contact's sequence (when the campaign is set to stop on reply), whatever its label.
 
 Without AI, Pawpost still spots common opt-out phrases ("unsubscribe", "remove me", "not interested", "stop") and suppresses those senders.
 

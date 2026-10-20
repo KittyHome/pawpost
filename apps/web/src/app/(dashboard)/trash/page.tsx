@@ -62,10 +62,7 @@ export default async function TrashPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <Tabs
-          defaultValue={trash.campaigns.length ? "campaigns" : trash.lists.length ? "lists" : "contacts"}
-          className="gap-4"
-        >
+        <Tabs defaultValue={trash.campaigns.length ? "campaigns" : trash.lists.length ? "lists" : "contacts"} className="gap-4">
           <TabsList>
             <TabsTrigger value="campaigns">Campaigns ({trash.campaigns.length})</TabsTrigger>
             <TabsTrigger value="lists">Lists ({trash.lists.length})</TabsTrigger>

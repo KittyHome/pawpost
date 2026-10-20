@@ -1,12 +1,14 @@
 "use client";
 
 import { PROVIDER_PRESETS } from "@pawpost/mail/presets";
+import { TriangleAlertIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { FormAlert } from "@/components/form-alert";
 import { LearnMore } from "@/components/help-link";
 import { SubmitButton } from "@/components/submit-button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,7 +44,16 @@ const PASSWORD_HELP: Record<string, string> = {
   custom: "/help/mailboxes#other-providers",
 };
 
-export function MailboxForm({ mailboxId, defaults }: { mailboxId?: string; defaults?: MailboxDefaults }) {
+export function MailboxForm({
+  mailboxId,
+  defaults,
+  ageDays = 0,
+}: {
+  mailboxId?: string;
+  defaults?: MailboxDefaults;
+  /** Age of an existing mailbox, in days. New mailboxes are 0. */
+  ageDays?: number;
+}) {
   const { state, pending, formProps } = useActionForm(saveMailbox.bind(null, mailboxId ?? null), idle);
   const editing = Boolean(mailboxId);
 
@@ -74,6 +85,15 @@ export function MailboxForm({ mailboxId, defaults }: { mailboxId?: string; defau
       });
     }
   };
+
+  const [dailyLimit, setDailyLimit] = useState(String(defaults?.dailyLimit ?? 10));
+  const limit = Number(dailyLimit);
+  const pacingWarning =
+    limit > 50
+      ? "Past about 50 emails a day, adding another mailbox is safer than pushing this one. You can still save this."
+      : limit > 20 && ageDays < 14
+        ? "New mailboxes usually stay at 10–20 emails a day. You can still save this."
+        : null;
 
   const err = (field: string) => fieldError(state, field);
 
@@ -205,7 +225,8 @@ export function MailboxForm({ mailboxId, defaults }: { mailboxId?: string; defau
                   type="number"
                   min={1}
                   max={500}
-                  defaultValue={defaults?.dailyLimit ?? 30}
+                  value={dailyLimit}
+                  onChange={(e) => setDailyLimit(e.target.value)}
                 />
                 <FieldDescription>
                   Emails per rolling 24 hours. Start new mailboxes at 10–20.{" "}
@@ -228,6 +249,16 @@ export function MailboxForm({ mailboxId, defaults }: { mailboxId?: string; defau
               </Field>
             </FieldGroup>
           </FieldSet>
+
+          {pacingWarning && (
+            <Alert>
+              <TriangleAlertIcon />
+              <AlertTitle>High daily limit</AlertTitle>
+              <AlertDescription>
+                {pacingWarning} <LearnMore href="/help/deliverability#ramp-up-new-mailboxes-slowly">Ramp-up plan</LearnMore>
+              </AlertDescription>
+            </Alert>
+          )}
 
           <FormAlert
             state={state}

@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { NoAccess } from "@/components/no-access";
 import { PageHeader } from "@/components/page-header";
 import { MailboxForm } from "@/features/mailboxes/mailbox-form";
+import { daysSince } from "@/lib/format";
 import { engine } from "@/server/engine";
 import { requireSession } from "@/server/session";
 
@@ -45,6 +46,7 @@ export default async function EditMailboxPage({ params }: PageProps<"/mailboxes/
           dailyLimit: mailbox.dailyLimit,
           minIntervalSeconds: mailbox.minIntervalSeconds,
         }}
+        ageDays={daysSince(mailbox.createdAt)}
       />
     </>
   );

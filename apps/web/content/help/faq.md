@@ -22,7 +22,7 @@ No. Pawpost deliberately sends plain-text emails, which reach the inbox more rel
 
 ### Where do I read and answer replies?
 
-In the mailbox itself (Gmail, Outlook…), as usual. Pawpost reads the same inbox in the background to stop sequences and log replies, but it doesn't replace your email app.
+In the mailbox itself (Gmail, Outlook…), as usual. Pawpost reads the same inbox in the background to stop sequences and log replies, and lists people who need a look under **Replies**. Answer from your mail app, then mark the reply done in Pawpost.
 
 ### Will contacts get the same email twice?
 

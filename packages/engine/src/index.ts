@@ -8,6 +8,7 @@ import { createInboxSync } from "./inbox-sync";
 import { createListService } from "./lists";
 import { createMailboxService } from "./mailboxes";
 import { createPrivacyService } from "./privacy";
+import { createReplyService } from "./replies";
 import { createStatsService } from "./stats";
 import { createSuppressionService } from "./suppressions";
 import { createSystemService } from "./system";
@@ -38,6 +39,7 @@ export function createEngine(options: CreateEngineOptions) {
     suppressions: createSuppressionService(ctx),
     trash: createTrashService(ctx),
     privacy: createPrivacyService(ctx),
+    replies: createReplyService(ctx),
     stats: createStatsService(ctx),
     ai,
     system: createSystemService(ctx),
@@ -63,6 +65,8 @@ export type { InboxSyncSummary } from "./inbox-sync";
 export type { BulkResult, ContactQuery, ImportReport, ListOverview, ListSummary } from "./lists";
 export type { ConnectionTestResult, MailboxSummary } from "./mailboxes";
 export type { ErasePreview } from "./privacy";
+export type { ReplyCounts, ReplyQuery, ReplyRow, ReplyTab } from "./replies";
+export { REPLY_TABS } from "./replies";
 export type { CampaignStats } from "./stats";
 export type { WorkerStatus } from "./system";
 export type { TrashKind } from "./trash";

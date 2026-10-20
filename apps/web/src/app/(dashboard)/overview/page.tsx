@@ -27,13 +27,14 @@ export const metadata: Metadata = { title: "Overview" };
 export default async function OverviewPage() {
   const publicUrl = checkPublicUrl(env().APP_URL);
   const e = engine();
-  const [overview, activity, mailboxes, lists, campaigns, worker] = await Promise.all([
+  const [overview, activity, mailboxes, lists, campaigns, worker, inbox] = await Promise.all([
     e.stats.overview(),
     e.stats.recentActivity({ limit: 15 }),
     e.mailboxes.list(),
     e.lists.list(),
     e.campaigns.list(),
     e.system.workerStatus(),
+    e.replies.counts(),
   ]);
   const week = overview.last7Days;
 
@@ -57,6 +58,21 @@ export default async function OverviewPage() {
           </Button>
         }
       />
+
+      {inbox.needsAttention > 0 && (
+        <Alert>
+          <MessageSquareReplyIcon />
+          <AlertTitle>
+            {inbox.needsAttention === 1 ? "1 reply needs a look" : `${formatNumber(inbox.needsAttention)} replies need a look`}
+          </AlertTitle>
+          <AlertDescription>
+            Interested people, questions and referrals.{" "}
+            <Link href="/inbox" className="font-medium underline underline-offset-3 hover:text-foreground">
+              Open replies
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {!worker.online && (
         <Alert variant="destructive">

@@ -69,7 +69,7 @@ If your IMAP login differs from your SMTP login, fill in the optional **IMAP use
 
 ## Pacing: daily limit and minimum gap
 
-- **Daily limit**: the most emails this mailbox sends in any 24-hour period. Start new mailboxes at **10–20**, then raise it gradually to 30–50 over a few weeks. [Ramp-up plan](/help/deliverability#ramp-up-new-mailboxes-slowly)
+- **Daily limit**: the most emails this mailbox sends in any 24-hour period. New mailboxes start at **10**. Raise it gradually to 30–50 over a few weeks. Pawpost warns if the limit looks high for a young mailbox, but it still saves. [Ramp-up plan](/help/deliverability#ramp-up-new-mailboxes-slowly)
 - **Minimum gap**: seconds between two emails from this mailbox, plus a random 0–50% extra. The default is 180 seconds (3 minutes).
 
 You can change both at any time with **Edit**.
