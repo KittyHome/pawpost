@@ -94,7 +94,7 @@ export default async function ListPage({ params, searchParams }: PageProps<"/lis
           </div>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 px-0">
-          <ContactsTable>
+          <ContactsTable
             listId={id}
             rows={contacts.rows.map((c) => ({
               id: c.id,
