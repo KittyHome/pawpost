@@ -46,7 +46,7 @@ Yes. Invite teammates from **Settings → Team**; each gets their own login and 
 
 ### Does Pawpost warm up my mailboxes?
 
-Not yet; automatic warm-up is planned. For now, raise each mailbox's daily limit gradually by hand. [Ramp-up schedule](/help/deliverability#ramp-up-new-mailboxes-slowly)
+No. Raise each mailbox's daily limit by hand, slowly. [Ramp-up schedule](/help/deliverability#ramp-up-new-mailboxes-slowly)
 
 ### What does it cost?
 

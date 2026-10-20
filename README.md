@@ -112,10 +112,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Roadmap
 
-- Mailbox warm-up (gradual daily ramp, then an opt-in warm-up network)
+- Safer send decisions and a reply inbox you can act on (interested / questions), not mailbox warm-up
 - More AI providers behind the same interface
 - Sign in with Google / Microsoft (OAuth), and OAuth for Microsoft 365 mailboxes
-- Per-contact AI personalisation of the first line
+- Per-contact AI personalisation of the first line (only with facts you already have)
 - Open/click tracking as an opt-in (off by default; it hurts deliverability)
 
 ## License

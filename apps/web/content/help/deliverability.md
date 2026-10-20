@@ -41,7 +41,7 @@ New mailboxes and new domains have no reputation yet. Sending a lot immediately 
 To send more, add mailboxes instead of pushing one mailbox past about 50 a day.
 
 > [!NOTE]
-> Automatic warm-up is planned for a future version. Until then, follow this schedule by hand.
+> Pawpost does not raise the limit for you. Follow this schedule by hand (Mailboxes → ⋯ → Edit).
 
 ## Write like a person
 
