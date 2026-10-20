@@ -60,7 +60,7 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
       )}
 
       {counts.all > 0 && (
-        <div className="flex flex-wrap gap-1" role="group" aria-label="Filter by status">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by status">
           {STATUS_TABS.map((t) => (
             <Button key={t.value} size="sm" variant={status === t.value ? "default" : "outline"} asChild>
               <Link href={t.value === "all" ? "/campaigns" : `/campaigns?status=${t.value}`}>
@@ -89,7 +89,7 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
           </EmptyContent>
         </Empty>
       ) : (
-        <Card className="py-0">
+        <Card className="gap-0 py-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -107,10 +107,17 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
                 return (
                   <TableRow key={c.id}>
                     <TableCell>
-                      <Link href={`/campaigns/${c.id}`} className="font-medium hover:underline">
-                        {c.name}
-                      </Link>
-                      <div className="text-xs text-muted-foreground">{c.listName}</div>
+                      <div className="flex items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50 text-muted-foreground">
+                          <SendIcon className="size-4" />
+                        </span>
+                        <div className="flex min-w-0 flex-col">
+                          <Link href={`/campaigns/${c.id}`} className="truncate font-medium hover:underline">
+                            {c.name}
+                          </Link>
+                          <span className="truncate text-xs text-muted-foreground">{c.listName}</span>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <StatusBadge status={c.status} />
@@ -141,6 +148,10 @@ export default async function CampaignsPage({ searchParams }: PageProps<"/campai
               })}
             </TableBody>
           </Table>
+          <div className="border-t px-4 py-3 text-xs text-muted-foreground">
+            {formatNumber(campaigns.length)} {campaigns.length === 1 ? "campaign" : "campaigns"}
+            {status !== "all" ? ` · ${status}` : ""}
+          </div>
         </Card>
       )}
     </>

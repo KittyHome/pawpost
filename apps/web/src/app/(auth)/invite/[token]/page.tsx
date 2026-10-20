@@ -41,7 +41,7 @@ export default async function InvitePage({ params }: PageProps<"/invite/[token]"
           and password to finish.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
         <AcceptInviteForm token={token} email={invitation.email} />
       </CardContent>
     </Card>

@@ -39,10 +39,10 @@ export default async function HelpArticlePage({ params }: PageProps<"/help/[slug
         ]}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_15rem]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_16rem]">
         <div className="flex min-w-0 flex-col gap-6">
           <Card>
-            <CardContent className="py-2">
+            <CardContent className="py-6">
               <Markdown>{article.body}</Markdown>
             </CardContent>
           </Card>
@@ -54,7 +54,7 @@ export default async function HelpArticlePage({ params }: PageProps<"/help/[slug
         </div>
 
         <aside className="hidden lg:block">
-          <div className="sticky top-6 flex flex-col gap-6 text-sm">
+          <div className="sticky top-20 flex flex-col gap-8 text-sm">
             {article.headings.length > 0 && (
               <nav aria-label="On this page" className="flex flex-col gap-2">
                 <span className="font-medium">On this page</span>

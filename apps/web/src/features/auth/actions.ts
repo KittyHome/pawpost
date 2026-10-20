@@ -11,7 +11,8 @@ import { clearSessionCookie, requestMeta, sessionToken, setSessionCookie } from 
 /** Only allow same-site relative redirects after sign-in. */
 function safeNext(value: FormDataEntryValue | null): string {
   const next = typeof value === "string" ? value : "";
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  if (!next || next === "/") return "/overview";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/overview";
 }
 
 export async function login(_prev: ActionState, form: FormData): Promise<ActionState> {
@@ -32,7 +33,7 @@ export async function setupOwner(_prev: ActionState, form: FormData): Promise<Ac
   return runPublicAction(async () => {
     const { token } = await engine().accounts.setupOwner(formToObject(form), await requestMeta(), env().SETUP_TOKEN);
     await setSessionCookie(token);
-    redirect("/");
+    redirect("/overview");
   });
 }
 
@@ -40,7 +41,7 @@ export async function acceptInvitation(inviteToken: string, _prev: ActionState, 
   return runPublicAction(async () => {
     const { token } = await engine().accounts.acceptInvitation(inviteToken, formToObject(form), await requestMeta());
     await setSessionCookie(token);
-    redirect("/");
+    redirect("/overview");
   });
 }
 

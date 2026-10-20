@@ -17,7 +17,7 @@ export function NoAccess({ what = "this page" }: { what?: string }) {
       </EmptyHeader>
       <EmptyContent>
         <Button asChild variant="outline">
-          <Link href="/">Back to overview</Link>
+          <Link href="/overview">Back to overview</Link>
         </Button>
       </EmptyContent>
     </Empty>

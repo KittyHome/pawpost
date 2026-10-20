@@ -91,7 +91,7 @@ export function ActivityFeed({ items, showCampaign = true }: { items: ActivityIt
         const meta = META[item.type] ?? META.sent!;
         const intent = item.type === "reply" && typeof item.detail.intent === "string" ? item.detail.intent : null;
         return (
-          <li key={item.id} className="flex items-start gap-3 py-3">
+          <li key={item.id} className="flex items-start gap-3 py-3.5 first:pt-0 last:pb-0">
             <meta.icon className={`mt-0.5 size-4 shrink-0 ${meta.className}`} aria-hidden />
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">

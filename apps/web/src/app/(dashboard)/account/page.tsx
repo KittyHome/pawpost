@@ -88,7 +88,7 @@ export default async function AccountPage() {
               const Icon = device.mobile ? SmartphoneIcon : LaptopIcon;
               const current = s.id === sessionId;
               return (
-                <li key={s.id} className="flex items-center gap-3 py-3">
+                <li key={s.id} className="flex items-center gap-3 py-3.5 first:pt-0 last:pb-0">
                   <Icon className="size-5 shrink-0 text-muted-foreground" aria-hidden />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="flex items-center gap-2 text-sm font-medium">

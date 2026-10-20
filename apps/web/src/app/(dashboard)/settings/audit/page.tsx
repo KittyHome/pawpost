@@ -41,8 +41,10 @@ export default async function AuditLogPage({ searchParams }: PageProps<"/setting
           </Button>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <AuditFilters users={users.map((u) => ({ id: u.id, label: `${u.name} (${u.email})` }))} />
+      <CardContent className="flex flex-col gap-4 px-0">
+        <div className="px-(--card-spacing)">
+          <AuditFilters users={users.map((u) => ({ id: u.id, label: `${u.name} (${u.email})` }))} />
+        </div>
         <Table>
           <TableHeader>
             <TableRow>
@@ -80,7 +82,9 @@ export default async function AuditLogPage({ searchParams }: PageProps<"/setting
             )}
           </TableBody>
         </Table>
-        <Pagination page={log.page} pageSize={log.pageSize} total={log.total} hrefFor={href} />
+        <div className="px-(--card-spacing)">
+          <Pagination page={log.page} pageSize={log.pageSize} total={log.total} hrefFor={href} />
+        </div>
       </CardContent>
     </Card>
   );

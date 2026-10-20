@@ -49,7 +49,7 @@ const NAV = [
   {
     label: "Outreach",
     items: [
-      { title: "Overview", href: "/", icon: LayoutDashboardIcon },
+      { title: "Overview", href: "/overview", icon: LayoutDashboardIcon },
       { title: "Campaigns", href: "/campaigns", icon: SendIcon },
       { title: "Contact lists", href: "/lists", icon: UsersIcon },
     ],
@@ -104,10 +104,10 @@ export function AppSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/overview">
                 <LogoMark className="size-8!" />
                 <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-semibold">Pawpost</span>
+                  <span className="truncate font-semibold tracking-tight">Pawpost</span>
                   <span className="truncate text-xs text-muted-foreground">Cold outreach</span>
                 </div>
               </Link>

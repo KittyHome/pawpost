@@ -19,7 +19,7 @@ export default async function NewCampaignPage() {
         help={{ href: "/help/campaigns", label: "Creating and running campaigns" }}
         breadcrumbs={[{ label: "Campaigns", href: "/campaigns" }, { label: "New" }]}
       />
-      <Card className="max-w-xl">
+      <Card className="max-w-2xl">
         <CardHeader>
           <CardTitle>Who is it for?</CardTitle>
           <CardDescription>Pick the contact list this campaign will email.</CardDescription>
@@ -28,9 +28,11 @@ export default async function NewCampaignPage() {
           {lists.length ? (
             <CreateCampaignForm lists={lists} />
           ) : (
-            <div className="flex flex-col items-start gap-3 text-sm text-muted-foreground">
-              Import a contact list first.
-              <Button asChild size="sm">
+            <div className="flex flex-col items-start gap-4">
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                Import a contact list first. A campaign needs at least one person to email.
+              </p>
+              <Button asChild>
                 <Link href="/lists">Import contacts</Link>
               </Button>
             </div>

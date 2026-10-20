@@ -9,6 +9,7 @@ const SESSION_COOKIE = "pawpost_session";
  */
 export function proxy(request: NextRequest) {
   if (request.cookies.get(SESSION_COOKIE)?.value) return NextResponse.next();
+  if (request.nextUrl.pathname === "/") return NextResponse.next();
 
   const login = new URL("/login", request.url);
   const next = request.nextUrl.pathname + request.nextUrl.search;
@@ -17,9 +18,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Public: sign-in and account flows, recipient-facing unsubscribe pages, health check, static assets,
-  // and the icon and preview image that link unfurlers fetch without signing in.
+  // Public: marketing home, sign-in and account flows, recipient-facing unsubscribe pages, health check,
+  // static assets, and the icon and preview image that link unfurlers fetch without signing in.
   matcher: [
-    "/((?!login|setup|invite/|forgot-password|reset-password/|u/|api/unsubscribe|api/health|_next/static|_next/image|favicon.ico|opengraph-image|apple-icon|.*\\.(?:svg|png|ico)$).*)",
+    "/((?!$|login|setup|invite/|forgot-password|reset-password/|u/|api/unsubscribe|api/health|_next/static|_next/image|favicon.ico|opengraph-image|apple-icon|.*\\.(?:svg|png|ico)$).*)",
   ],
 };

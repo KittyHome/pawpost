@@ -22,9 +22,7 @@ export default function HelpCenterPage() {
         description="Step-by-step guides for everything in Pawpost, written for first-time users."
       />
 
-      <div className="mx-auto w-full max-w-2xl">
-        <HelpSearch entries={entries} />
-      </div>
+      <HelpSearch entries={entries} />
 
       <Card className="border-primary/20 bg-primary/[0.03]">
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -47,7 +45,7 @@ export default function HelpCenterPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {HELP_CATEGORIES.map((category) => {
           const inCategory = articles.filter((a) => a.category === category.id);
           if (!inCategory.length) return null;

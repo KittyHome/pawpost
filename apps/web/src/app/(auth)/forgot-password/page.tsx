@@ -20,7 +20,7 @@ export default function ForgotPasswordPage() {
             : "This installation doesn't send email, so password resets go through an admin."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
         {mailConfigured ? (
           <ForgotPasswordForm />
         ) : (

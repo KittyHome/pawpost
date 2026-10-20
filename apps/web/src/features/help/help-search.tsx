@@ -38,7 +38,7 @@ export function HelpSearch({ entries }: { entries: SearchEntry[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder='Search the guide, e.g. "app password", "bounce", "spam"'
-          className="h-11 pl-9 text-base"
+          className="h-12 max-w-2xl pl-9 text-base"
           aria-label="Search help"
           autoFocus
         />

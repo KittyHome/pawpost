@@ -25,7 +25,7 @@ export default async function UnsubscribePage({ params, searchParams }: PageProp
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+    <main className="flex min-h-svh items-center justify-center bg-muted/40 p-6">
       <Card className="w-full max-w-md">
         {!info ? (
           <CardHeader>

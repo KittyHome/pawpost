@@ -25,7 +25,7 @@ export function AddSuppressionForm() {
   }, [state]);
 
   return (
-    <form ref={formRef} {...formProps} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <form ref={formRef} {...formProps} className="flex flex-col gap-4 sm:flex-row sm:items-end">
       <Field className="flex-1" data-invalid={Boolean(fieldError(state, "email"))}>
         <FieldLabel htmlFor="email">Email address</FieldLabel>
         <Input id="email" name="email" type="email" required placeholder="someone@example.com" />

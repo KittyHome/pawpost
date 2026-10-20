@@ -73,7 +73,7 @@ export default async function ListPage({ params, searchParams }: PageProps<"/lis
             <CardDescription>{formatNumber(contacts.total)} matching</CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex gap-1" role="group" aria-label="Filter by status">
+            <div className="flex gap-2" role="group" aria-label="Filter by status">
               {STATUS_FILTERS.map((f) => (
                 <Button key={f.value} size="sm" variant={status === f.value ? "default" : "outline"} asChild>
                   <Link href={statusHref(f.value)}>{f.label}</Link>
@@ -93,8 +93,8 @@ export default async function ListPage({ params, searchParams }: PageProps<"/lis
             </form>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <ContactsTable
+        <CardContent className="flex flex-col gap-4 px-0">
+          <ContactsTable>
             listId={id}
             rows={contacts.rows.map((c) => ({
               id: c.id,
@@ -118,7 +118,7 @@ export default async function ListPage({ params, searchParams }: PageProps<"/lis
             pageSize={contacts.pageSize}
             total={contacts.total}
             hrefFor={href}
-            className="border-t pt-4"
+            className="border-t px-(--card-spacing) pt-4"
           />
         </CardContent>
       </Card>

@@ -128,7 +128,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
         </Card>
       )}
 
-      <Tabs defaultValue={tab}>
+      <Tabs defaultValue={tab} className="gap-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sequence">Sequence ({campaign.steps.length})</TabsTrigger>
@@ -136,8 +136,8 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
           <TabsTrigger value="contacts">Contacts</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <TabsContent value="overview" className="flex flex-col gap-5">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               label="Enrolled"
               value={formatNumber(s.enrolled)}
@@ -190,6 +190,10 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
 
         <TabsContent value="settings">
           <Card>
+            <CardHeader>
+              <CardTitle>Campaign settings</CardTitle>
+              <CardDescription>Schedule, mailboxes and the postal address added to every email.</CardDescription>
+            </CardHeader>
             <CardContent>
               <CampaignSettingsForm
                 campaignId={id}
@@ -213,7 +217,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
           </Card>
         </TabsContent>
 
-        <TabsContent value="contacts" className="flex flex-col gap-4">
+        <TabsContent value="contacts" className="flex flex-col gap-5">
           <div className="flex flex-wrap gap-2">
             {ENROLLMENT_FILTERS.map((f) => (
               <Button key={f} variant={f === statusFilter ? "default" : "outline"} size="sm" asChild>
@@ -221,7 +225,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps<"
               </Button>
             ))}
           </div>
-          <Card className="py-0">
+          <Card className="gap-0 py-0">
             <Table>
               <TableHeader>
                 <TableRow>

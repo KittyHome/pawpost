@@ -21,7 +21,7 @@ export default async function SetupPage() {
           Create the owner account for this installation. You can invite your team once you&apos;re in.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
         <SetupForm requiresToken={Boolean(env().SETUP_TOKEN)} />
       </CardContent>
     </Card>

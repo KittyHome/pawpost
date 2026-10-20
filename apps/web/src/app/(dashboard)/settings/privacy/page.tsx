@@ -38,34 +38,36 @@ export default async function PrivacyPage() {
             CSV files that open in Excel, Google Sheets or Numbers. Every export is recorded in the audit log.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3 text-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>Suppression list (everyone who must never be emailed)</span>
-            <Button variant="outline" size="sm" asChild>
-              <a href="/api/export/suppressions" download>
-                <DownloadIcon /> Download
-              </a>
-            </Button>
+        <CardContent className="px-0 pb-0">
+          <div className="divide-y text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-(--card-spacing) py-3.5">
+              <span>Suppression list (everyone who must never be emailed)</span>
+              <Button variant="outline" size="sm" asChild>
+                <a href="/api/export/suppressions" download>
+                  <DownloadIcon /> Download
+                </a>
+              </Button>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-(--card-spacing) py-3.5">
+              <span>Audit log</span>
+              <Button variant="outline" size="sm" asChild>
+                <a href="/api/export/audit" download>
+                  <DownloadIcon /> Download
+                </a>
+              </Button>
+            </div>
+            <p className="px-(--card-spacing) py-3.5 text-muted-foreground">
+              Contact lists and campaign results are exported from their own pages:{" "}
+              <Link href="/lists" className="underline underline-offset-4">
+                Contact lists
+              </Link>{" "}
+              ·{" "}
+              <Link href="/campaigns" className="underline underline-offset-4">
+                Campaigns
+              </Link>
+              .
+            </p>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>Audit log</span>
-            <Button variant="outline" size="sm" asChild>
-              <a href="/api/export/audit" download>
-                <DownloadIcon /> Download
-              </a>
-            </Button>
-          </div>
-          <p className="text-muted-foreground">
-            Contact lists and campaign results are exported from their own pages:{" "}
-            <Link href="/lists" className="underline underline-offset-4">
-              Contact lists
-            </Link>{" "}
-            ·{" "}
-            <Link href="/campaigns" className="underline underline-offset-4">
-              Campaigns
-            </Link>
-            .
-          </p>
         </CardContent>
       </Card>
     </>

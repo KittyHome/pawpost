@@ -62,7 +62,10 @@ export default async function TrashPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <Tabs defaultValue={trash.campaigns.length ? "campaigns" : trash.lists.length ? "lists" : "contacts"}>
+        <Tabs
+          defaultValue={trash.campaigns.length ? "campaigns" : trash.lists.length ? "lists" : "contacts"}
+          className="gap-4"
+        >
           <TabsList>
             <TabsTrigger value="campaigns">Campaigns ({trash.campaigns.length})</TabsTrigger>
             <TabsTrigger value="lists">Lists ({trash.lists.length})</TabsTrigger>
@@ -70,7 +73,7 @@ export default async function TrashPage() {
           </TabsList>
 
           <TabsContent value="campaigns">
-            <Card className="py-0">
+            <Card className="gap-0 py-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -91,7 +94,7 @@ export default async function TrashPage() {
                       <TableCell>
                         <StatusBadge status={c.status} />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         <TrashItemActions kind="campaign" id={c.id} label={c.name} canPurge={canPurge} />
                       </TableCell>
                     </TableRow>
@@ -103,7 +106,7 @@ export default async function TrashPage() {
           </TabsContent>
 
           <TabsContent value="lists">
-            <Card className="py-0">
+            <Card className="gap-0 py-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -122,7 +125,7 @@ export default async function TrashPage() {
                         <div className="text-xs text-muted-foreground">{deletedLine(l)}</div>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{formatNumber(l.contactCount)}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         <TrashItemActions kind="list" id={l.id} label={l.name} canPurge={canPurge} />
                       </TableCell>
                     </TableRow>
@@ -134,7 +137,7 @@ export default async function TrashPage() {
           </TabsContent>
 
           <TabsContent value="contacts">
-            <Card className="py-0">
+            <Card className="gap-0 py-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -153,7 +156,7 @@ export default async function TrashPage() {
                         <div className="text-xs text-muted-foreground">{deletedLine(c)}</div>
                       </TableCell>
                       <TableCell className="text-sm">{c.listName}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         <TrashItemActions kind="contact" id={c.id} label={c.email} canPurge={canPurge} />
                       </TableCell>
                     </TableRow>

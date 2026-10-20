@@ -94,8 +94,8 @@ export function SequenceEditor({
   const variables = [...STANDARD_VARIABLES, ...attributeColumns];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           {editable
             ? "Follow-ups with an empty subject are sent as replies in the same thread. "

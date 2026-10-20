@@ -39,7 +39,7 @@ export default async function TeamPage() {
             </CardAction>
           )}
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -93,7 +93,7 @@ export default async function TeamPage() {
               Links are shown once, when created. To resend, withdraw the invitation and invite again.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className={invitations.length === 0 ? undefined : "px-0"}>
             {invitations.length === 0 ? (
               <p className="text-sm text-muted-foreground">No pending invitations.</p>
             ) : (

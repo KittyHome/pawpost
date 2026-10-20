@@ -79,7 +79,7 @@ export default async function OverviewPage() {
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Emails sent"
           value={formatNumber(week.sent)}
@@ -106,7 +106,7 @@ export default async function OverviewPage() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Recent activity</CardTitle>
@@ -117,7 +117,7 @@ export default async function OverviewPage() {
           </CardContent>
         </Card>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {!setupDone && (
             <Card>
               <CardHeader>
@@ -127,13 +127,13 @@ export default async function OverviewPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ol className="flex flex-col gap-3">
+                <ol className="flex flex-col gap-3.5">
                   {setup.map((step) => (
-                    <li key={step.label} className="flex items-center gap-2 text-sm">
+                    <li key={step.label} className="flex items-center gap-3 text-sm">
                       {step.done ? (
-                        <CircleCheckIcon className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden />
+                        <CircleCheckIcon className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
                       ) : (
-                        <CircleIcon className="size-4 text-muted-foreground" aria-hidden />
+                        <CircleIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                       )}
                       {step.done ? (
                         <span className="text-muted-foreground line-through">{step.label}</span>
@@ -152,11 +152,13 @@ export default async function OverviewPage() {
             <CardHeader>
               <CardTitle>At a glance</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2 text-sm">
-              <Row label="Active campaigns" value={formatNumber(overview.activeCampaigns)} />
-              <Row label="Active mailboxes" value={formatNumber(overview.mailboxes.active ?? 0)} />
-              <Row label="Mailboxes with errors" value={formatNumber(overview.mailboxes.error ?? 0)} />
-              <Row label="Contact lists" value={formatNumber(lists.length)} />
+            <CardContent className="px-0 pb-0">
+              <div className="divide-y text-sm">
+                <Row label="Active campaigns" value={formatNumber(overview.activeCampaigns)} />
+                <Row label="Active mailboxes" value={formatNumber(overview.mailboxes.active ?? 0)} />
+                <Row label="Mailboxes with errors" value={formatNumber(overview.mailboxes.error ?? 0)} />
+                <Row label="Contact lists" value={formatNumber(lists.length)} />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -167,7 +169,7 @@ export default async function OverviewPage() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-4 px-(--card-spacing) py-3">
       <span className="text-muted-foreground">{label}</span>
       <span className="font-medium tabular-nums">{value}</span>
     </div>

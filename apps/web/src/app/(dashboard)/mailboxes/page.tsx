@@ -12,7 +12,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { MailboxRowActions } from "@/features/mailboxes/mailbox-row-actions";
-import { formatRelative } from "@/lib/format";
+import { formatNumber, formatRelative } from "@/lib/format";
 import { engine } from "@/server/engine";
 import { requireSession } from "@/server/session";
 
@@ -59,7 +59,7 @@ export default async function MailboxesPage() {
           </EmptyContent>
         </Empty>
       ) : (
-        <Card className="py-0">
+        <Card className="gap-0 py-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -67,7 +67,7 @@ export default async function MailboxesPage() {
                 <TableHead>Status</TableHead>
                 <TableHead className="w-48">Sent (24h)</TableHead>
                 <TableHead>Inbox synced</TableHead>
-                <TableHead className="text-right">
+                <TableHead className="w-36 text-right">
                   <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
@@ -76,12 +76,17 @@ export default async function MailboxesPage() {
               {mailboxes.map((m) => (
                 <TableRow key={m.id}>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{m.email}</span>
-                      <span className="text-xs text-muted-foreground">{m.fromName}</span>
-                      {m.lastError && (
-                        <span className="mt-1 max-w-md text-xs whitespace-normal text-destructive">{m.lastError}</span>
-                      )}
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50 text-muted-foreground">
+                        <InboxIcon className="size-4" />
+                      </span>
+                      <div className="flex min-w-0 flex-col">
+                        <span className="font-medium">{m.email}</span>
+                        <span className="text-xs text-muted-foreground">{m.fromName}</span>
+                        {m.lastError && (
+                          <span className="mt-1 max-w-md text-xs whitespace-normal text-destructive">{m.lastError}</span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -89,24 +94,29 @@ export default async function MailboxesPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-sm tabular-nums">
-                        {m.sentLast24h} / {m.dailyLimit}
+                      <span className="tabular-nums">
+                        {formatNumber(m.sentLast24h)} / {formatNumber(m.dailyLimit)}
                       </span>
                       <Progress value={Math.min((m.sentLast24h / m.dailyLimit) * 100, 100)} className="h-1.5" />
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground">
                     {m.lastError?.startsWith("IMAP:") ? (
                       <span className="text-destructive">Failing</span>
                     ) : (
                       formatRelative(m.lastSyncedAt)
                     )}
                   </TableCell>
-                  <TableCell>{manage && <MailboxRowActions id={m.id} email={m.email} status={m.status} />}</TableCell>
+                  <TableCell className="text-right">
+                    {manage && <MailboxRowActions id={m.id} email={m.email} status={m.status} />}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          <div className="border-t px-4 py-3 text-xs text-muted-foreground">
+            {formatNumber(mailboxes.length)} {mailboxes.length === 1 ? "mailbox" : "mailboxes"}
+          </div>
         </Card>
       )}
     </>

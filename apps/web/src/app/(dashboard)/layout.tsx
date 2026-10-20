@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { logout } from "@/features/auth/actions";
 import { engine } from "@/server/engine";
@@ -8,6 +9,8 @@ import { requireSession } from "@/server/session";
 
 // Every dashboard page reads live data and the session.
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
   const { user } = await requireSession();
@@ -22,13 +25,13 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
         logoutAction={logout}
       />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-          <span className="text-sm text-muted-foreground">Pawpost</span>
-          <ThemeToggle className="ml-auto" />
+        <header className="flex h-14 shrink-0 items-center border-b">
+          <div className="mx-auto flex h-full w-full max-w-6xl items-center px-6">
+            <SidebarTrigger className="-ml-1" />
+            <ThemeToggle className="ml-auto" />
+          </div>
         </header>
-        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 p-4 md:p-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-8">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -59,17 +59,17 @@ export default async function SuppressionsPage({ searchParams }: PageProps<"/sup
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1">
             <CardTitle>Suppressed addresses</CardTitle>
             <CardDescription>{formatNumber(result.total)} total</CardDescription>
           </div>
-          <form className="relative w-full max-w-xs">
+          <form className="relative w-full sm:max-w-xs">
             <SearchIcon className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <Input name="q" defaultValue={search} placeholder="Search email" className="pl-8" aria-label="Search suppressions" />
           </form>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4 px-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -122,7 +122,9 @@ export default async function SuppressionsPage({ searchParams }: PageProps<"/sup
               )}
             </TableBody>
           </Table>
-          <Pagination page={result.page} pageSize={result.pageSize} total={result.total} hrefFor={href} />
+          <div className="px-(--card-spacing)">
+            <Pagination page={result.page} pageSize={result.pageSize} total={result.total} hrefFor={href} />
+          </div>
         </CardContent>
       </Card>
     </>

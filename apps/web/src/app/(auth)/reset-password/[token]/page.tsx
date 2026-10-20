@@ -22,7 +22,7 @@ export default async function ResetPasswordPage({ params }: PageProps<"/reset-pa
             : "This reset link was already used or has expired. Ask for a new one."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
         {reset ? (
           <ResetPasswordForm token={token} email={reset.email} />
         ) : (

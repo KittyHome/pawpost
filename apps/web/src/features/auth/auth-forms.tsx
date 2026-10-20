@@ -18,7 +18,7 @@ export function LoginForm({ next }: { next?: string }) {
   const { state, pending, formProps } = useActionForm(login, idle);
   return (
     <form {...formProps} className="flex flex-col gap-6">
-      <input type="hidden" name="next" value={next ?? "/"} />
+      <input type="hidden" name="next" value={next ?? "/overview"} />
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>

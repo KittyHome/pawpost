@@ -78,7 +78,7 @@ export function MailboxForm({ mailboxId, defaults }: { mailboxId?: string; defau
   const err = (field: string) => fieldError(state, field);
 
   return (
-    <form {...formProps}>
+    <form {...formProps} className="max-w-3xl">
       <Card>
         <CardHeader>
           <CardTitle>{editing ? "Edit mailbox" : "Connect a mailbox"}</CardTitle>

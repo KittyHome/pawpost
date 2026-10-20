@@ -11,7 +11,7 @@ export default async function SettingsLayout({ children }: LayoutProps<"/setting
   return (
     <>
       <PageHeader title="Settings" help={{ href: "/help/team-and-access", label: "Team and access" }} />
-      <div className="grid gap-6 md:grid-cols-[12rem_minmax(0,1fr)]">
+      <div className="grid gap-8 md:grid-cols-[13rem_minmax(0,1fr)]">
         <SettingsNav
           items={[
             { href: "/settings", label: "General" },

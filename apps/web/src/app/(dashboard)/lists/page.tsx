@@ -74,11 +74,11 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="pl-4">List</TableHead>
+                <TableHead>List</TableHead>
                 <TableHead className="text-right">Contacts</TableHead>
                 <TableHead>Used in</TableHead>
                 <TableHead>Created</TableHead>
-                <TableHead className="w-12">
+                <TableHead className="w-12 text-right">
                   <span className="sr-only">Actions</span>
                 </TableHead>
               </TableRow>
@@ -86,7 +86,7 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
             <TableBody>
               {lists.map((list) => (
                 <TableRow key={list.id}>
-                  <TableCell className="py-3 pl-4">
+                  <TableCell>
                     <div className="flex items-center gap-3">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-md border bg-muted/50 text-muted-foreground">
                         <UsersIcon className="size-4" />
@@ -129,7 +129,7 @@ export default async function ListsPage({ searchParams }: PageProps<"/lists">) {
                       {formatRelative(list.createdAt)}
                     </time>
                   </TableCell>
-                  <TableCell className="pr-3 text-right">
+                  <TableCell className="text-right">
                     <ListRowActions listId={list.id} name={list.name} canExport={canExport} inUse={list.campaigns.length > 0} />
                   </TableCell>
                 </TableRow>

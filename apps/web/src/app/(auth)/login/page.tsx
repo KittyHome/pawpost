@@ -11,7 +11,7 @@ import { getSession } from "@/server/session";
 export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  if (await getSession()) redirect("/");
+  if (await getSession()) redirect("/overview");
   await ensureBootstrap();
   if (!(await engine().accounts.hasUsers())) redirect("/setup");
   const { next, reset } = await searchParams;
@@ -22,7 +22,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <CardTitle>Sign in</CardTitle>
         <CardDescription>Welcome back. Sign in to your Pawpost workspace.</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="flex flex-col gap-6">
         {reset && (
           <Alert>
             <CircleCheckIcon />
